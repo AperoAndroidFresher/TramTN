@@ -11,10 +11,13 @@ fun main(){
     val isValidUsername = validateFields.field1(user.username)
     val isValidEmail = validateFields.field2(user.email)
     val isValidPhoneNumber = validateFields.field3(user.phoneNumber)
+    val isValidPassword = validateFields.field4(user.password)
 
     println(isValidUsername)
     println(isValidEmail)
     println(isValidPhoneNumber)
+    println(isValidPassword)
+
 
 
 }
@@ -38,4 +41,9 @@ class ValidateFields{
         val phoneRegex = Regex("^\\d{11}\$")
         return phoneNumber.matches(phoneRegex)
     }
+    fun field4(password: String): Boolean {
+        val passwordRegex = Regex("^[a-zA-Z0-9]+\$")
+        return password.matches(passwordRegex)
+    }
+
 }
