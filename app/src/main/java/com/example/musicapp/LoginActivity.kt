@@ -70,6 +70,9 @@ class LoginActivity : AppCompatActivity() {
             }
 
             Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
         }
 
         signupText.setOnClickListener {
