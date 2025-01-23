@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Музыкальное приложение</string>
+    <!--login-->
+    <string name="login_title">Войдите в свой аккаунт</string>
+    <string name="login_username">Имя пользователя</string>
+    <string name="login_password">Пароль</string>
+    <string name="login_remember_checkbox">Запомнить меня</string>
+    <string name="login_button">Авторизоваться</string>
+    <string name="login_no_account">У вас нет учетной записи\?</string>
+    <string name="login_signup_before">Зарегистрироваться</string>
+
+    <!--signup-->
+    <string name="signup_title">Зарегистрироваться</string>
+    <string name="signup_username">Имя пользователя</string>
+    <string name="signup_password">Пароль</string>
+    <string name="signup_confirm_password">Подтвердите пароль</string>
+    <string name="signup_email">Электронная почта</string>
+    <string name="Signup_text_btn">Зарегистрироваться</string>
+
+    <!--nav_bottom-->
+    <string name="nav_bottom_home_text">Добро пожаловать домой</string>
+    <string name="nav_bottom_library_text">Добро пожаловать в библиотеку</string>
+    <string name="nav_bottom_playlist">велком в плейлист</string>
+
+    <!--menu_nav_bottom-->
+    <string name="menu_nav_bottom_home">Дом</string>
+    <string name="menu_nav_bottom_library">Библиотека</string>
+    <string name="menu_nav_bottom_playlist">Плейлист</string>
+</resources>

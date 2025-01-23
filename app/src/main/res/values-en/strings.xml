@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">MusicApp</string>
     <!--login-->
     <string name="login_title">Login to your account</string>
@@ -19,13 +19,11 @@
 
     <!--nav_bottom-->
     <string name="nav_bottom_home_text">Welcome to Home</string>
-    <string name="nav_bottom_library_text">Welcom to Library</string>
-    <string name="nav_bottom_playlist">wellcom to playlist</string>
+    <string name="nav_bottom_library_text">Welcome to Library</string>
+    <string name="nav_bottom_playlist">welcome to playlist</string>
 
     <!--menu_nav_bottom-->
     <string name="menu_nav_bottom_home">Home</string>
     <string name="menu_nav_bottom_library">Library</string>
     <string name="menu_nav_bottom_playlist">Playlist</string>
-    <string name="main_change_language" tools:ignore="MissingTranslation">Change Language</string>
-    <string name="ic_change_language">Đổi ngôn ngữ</string>
 </resources>

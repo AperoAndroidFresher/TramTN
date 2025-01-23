@@ -7,4 +7,27 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="login_title_white">#FFFFFF</color>
+    <color name="login_username_field_white">#AAAAAA</color>
+    <color name="login_username_error_red">#FF0000</color>
+    <color name="login_password_field_white">#AAAAAA</color>
+    <color name="login_password_error_red">#FF0000</color>
+    <color name="login_remember_field_white">#AAAAAA</color>
+    <color name="login_remember_btn_blue_06A0B5">#06A0B5</color>
+    <color name="login_background_btn_blue_00c0ff">#00C0FF</color>
+    <color name="login_text_btn_white">#FFFFFF</color>
+    <color name="login_no_account_white">#FFFFFF</color>
+    <color name="login_signup_before_blue_00c0ff">#00C0FF</color>
+    <color name="signup_title_white">#FFFFFF</color>
+    <color name="signup_username_field_white">#AAAAAA</color>
+    <color name="signup_username_error_red">#FF0000</color>
+    <color name="signup_password_field_white">#AAAAAA</color>
+    <color name="signup_password_error_red">#FF0000</color>
+    <color name="signup_confirm_password_white">#AAAAAA</color>
+    <color name="signup_email_white">#AAAAAA</color>
+    <color name="signup_email_error_red">#FF0000</color>
+    <color name="signup_btn_bg_blue_00c0ff">#00C0FF</color>
+    <color name="Signup_text_btn_white">#FFFFFF</color>
+    <color name="frl_bg_nav_bottom_black">#000000</color>
+    <color name="nav_bottom_home_text_white">#FFFFFF</color>
 </resources>

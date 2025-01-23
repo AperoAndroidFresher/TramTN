@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.models
 
 import android.content.Context
 import android.provider.MediaStore

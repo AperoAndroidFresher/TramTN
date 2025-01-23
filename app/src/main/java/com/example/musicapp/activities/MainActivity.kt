@@ -1,4 +1,4 @@
-package com.example.musicapp
+package com.example.musicapp.activities
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -7,14 +7,21 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.musicapp.R
+import com.example.musicapp.models.Song
+import com.example.musicapp.fragments.HomeFragment
+import com.example.musicapp.fragments.LibraryFragment
+import com.example.musicapp.fragments.PlaylistFragment
+import com.example.musicapp.models.getSongsFromDevice
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
+
     companion object {
         const val REQUEST_CODE_STORAGE_PERMISSION = 1001
     }
@@ -32,23 +39,23 @@ class MainActivity : AppCompatActivity() {
 
         checkAndRequestPermissions()
 
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.nav_bottom)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment())
+                .replace(R.id.fragContainer, HomeFragment())
                 .commit()
         }
 
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
             val selectedFragment = when (menuItem.itemId) {
-                R.id.nav_home -> HomeFragment()
-                R.id.nav_library -> LibraryFragment()
-                R.id.nav_playlist -> PlaylistFragment()
+                R.id.navHome -> HomeFragment()
+                R.id.navLibrary -> LibraryFragment()
+                R.id.navPlaylist -> PlaylistFragment()
                 else -> null
             }
             if (selectedFragment != null) {
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, selectedFragment)
+                    .replace(R.id.fragContainer, selectedFragment)
                     .addToBackStack(null)
                     .commit()
                 true
@@ -57,6 +64,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     fun playAudio(song: Song) {
         val mediaPlayer = MediaPlayer()
 

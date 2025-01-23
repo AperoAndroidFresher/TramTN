@@ -1,4 +1,4 @@
-package com.example.musicapp.dangki
+package com.example.musicapp.models
 
 fun main(){
     val validateFields = ValidateFields()

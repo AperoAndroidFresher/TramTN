@@ -11,7 +11,7 @@
         android:id="@+id/txtLibrary"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Welcom to Library"
+        android:text="@string/nav_bottom_library_text"
         android:textSize="20sp"
         android:textColor="#FFFFFF"/>
 

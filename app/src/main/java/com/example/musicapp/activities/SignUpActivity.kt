@@ -1,11 +1,13 @@
-package com.example.musicapp
+package com.example.musicapp.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.example.musicapp.R
 
 
-class SignUpActivity : AppCompatActivity() {
+class SignUpActivity : BaseActivity() {
 
     private lateinit var usernameField: EditText
     private lateinit var passwordField: EditText
@@ -19,18 +21,17 @@ class SignUpActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.signin)
+        setContentView(R.layout.activity_signup)
 
-
-        usernameField = findViewById(R.id.username)
-        passwordField = findViewById(R.id.password)
-        confirmPasswordField = findViewById(R.id.repassword)
-        emailField = findViewById(R.id.Email)
-        signUpButton = findViewById(R.id.SignButton)
-        usernameErrorText = findViewById(R.id.usernameErrorText)
-        passwordErrorText = findViewById(R.id.passwordErrorText)
-        emailErrorText = findViewById(R.id.emailErrorText)
-        backArrow = findViewById(R.id.backArrow)
+        usernameField = findViewById(R.id.ttUsername)
+        passwordField = findViewById(R.id.ttPassword)
+        confirmPasswordField = findViewById(R.id.ttRePassword)
+        emailField = findViewById(R.id.ttEmail)
+        signUpButton = findViewById(R.id.btnSignup)
+        usernameErrorText = findViewById(R.id.txtUsernameError)
+        passwordErrorText = findViewById(R.id.txtPasswordError)
+        emailErrorText = findViewById(R.id.txtEmailError)
+        backArrow = findViewById(R.id.icBack)
 
         backArrow.setOnClickListener {
             finish()
@@ -85,6 +86,9 @@ class SignUpActivity : AppCompatActivity() {
 
             if (isValid) {
                 showToast("Sign Up Successful!")
+                val intent = Intent(this, LoginActivity::class.java)
+                startActivity(intent)
+                finish()
             }
         }
     }
@@ -92,5 +96,6 @@ class SignUpActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
 
 }
