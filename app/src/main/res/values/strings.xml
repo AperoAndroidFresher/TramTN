@@ -28,4 +28,6 @@
     <string name="menu_nav_bottom_playlist">Playlist</string>
     <string name="main_change_language" tools:ignore="MissingTranslation">Change Language</string>
     <string name="ic_change_language">Đổi ngôn ngữ</string>
+    <string name="item_song_title">Song Title</string>
+    <string name="item_author_name">Author Name</string>
 </resources>

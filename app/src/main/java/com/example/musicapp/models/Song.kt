@@ -8,11 +8,13 @@ data class Song(
     val id: String,
     val title: String,
     val artist: String,
-    val uri: String
+    val uri: String,
+    val albumArt: String?
 )
 fun getSongsFromDevice(context: Context): List<Song> {
     val songList = mutableListOf<Song>()
-    val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+
+    val audioUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
     val projection = arrayOf(
         MediaStore.Audio.Media._ID,
         MediaStore.Audio.Media.TITLE,
@@ -20,41 +22,71 @@ fun getSongsFromDevice(context: Context): List<Song> {
         MediaStore.Audio.Media.ALBUM_ID
     )
 
-    val selection = "${MediaStore.Audio.Media.MIME_TYPE} = ?"
-    val selectionArgs = arrayOf("audio/mpeg")
+    val selection = "${MediaStore.Audio.Media.MIME_TYPE} IN (?, ?)"
+    val selectionArgs = arrayOf("audio/mpeg", "audio/mp4")
 
-    val cursor = context.contentResolver.query(uri, projection, selection, selectionArgs, null)
+    val sortOrder = "${MediaStore.Audio.Media.DATE_ADDED} DESC"
 
-    cursor?.use {
-        if (it.moveToFirst()) {
-            do {
-                val id = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
-                val artist = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
-                val albumId = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+    try {
+        val cursor = context.contentResolver.query(
+            audioUri,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder
+        )
 
-                val songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.buildUpon()
-                    .appendPath(id)
-                    .build()
-                    .toString()
+        cursor?.use {
+            if (it.moveToFirst()) {
+                do {
+                    val id = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
+                    val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)) ?: "Unknown Title"
+                    val artist = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)) ?: "Unknown Artist"
+                    val albumId = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
 
-                val song = Song(id, title, artist, songUri)
-                Log.d("SongList", "Song found: $title by $artist, URI: $songUri")
-                songList.add(song)
-            } while (it.moveToNext())
+                    // Lấy ảnh album
+                    val albumArt = getAlbumArt(context, albumId)
+
+                    val songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.buildUpon()
+                        .appendPath(id)
+                        .build()
+                        .toString()
+
+                    val song = Song(id, title, artist, songUri, albumArt)
+                    songList.add(song)
+
+                    Log.d("SongList", "Song found: $title by $artist, AlbumArt: $albumArt")
+                } while (it.moveToNext())
+            }
         }
-        it.close()
-    }
-    if (songList.isEmpty()) {
-        Log.e("SongList", "No songs found in device.")
-    } else {
-
-        Log.d("SongList", "Found ${songList.size} songs.")
-        songList.forEach { song ->
-            Log.d("SongList", "Song: ${song.title} by ${song.artist}, URI: ${song.uri}")
-        }
+    } catch (e: Exception) {
+        Log.e("SongList", "Error retrieving songs: ${e.message}", e)
     }
 
     return songList
+}
+
+fun getAlbumArt(context: Context, albumId: Long): String? {
+    val albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
+    val projection = arrayOf(MediaStore.Audio.Albums.ALBUM_ART)
+
+    val selection = "${MediaStore.Audio.Albums._ID} = ?"
+    val selectionArgs = arrayOf(albumId.toString())
+
+    val cursor = context.contentResolver.query(
+        albumUri,
+        projection,
+        selection,
+        selectionArgs,
+        null
+    )
+
+    cursor?.use {
+        if (it.moveToFirst()) {
+            return it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART))
+        }
+    }
+
+    return null
 }
 
