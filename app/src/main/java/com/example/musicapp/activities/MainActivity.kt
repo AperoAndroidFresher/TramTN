@@ -3,29 +3,25 @@ package com.example.musicapp.activities
 import android.Manifest
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicapp.R
-import com.example.musicapp.adapter.SongAdapter
-import com.example.musicapp.models.Song
 import com.example.musicapp.fragments.HomeFragment
 import com.example.musicapp.fragments.LibraryFragment
 import com.example.musicapp.fragments.PlaylistFragment
-import com.example.musicapp.interfaces.OnSongClickListener
-import com.example.musicapp.models.getSongsFromDevice
+import com.example.musicapp.fragments.SongListFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : BaseActivity(), OnSongClickListener {
-    private lateinit var mediaPlayer: MediaPlayer
-
+class MainActivity : AppCompatActivity() {
+    private var mediaPlayer: MediaPlayer? = null
 
     companion object {
         const val REQUEST_CODE_STORAGE_PERMISSION = 1001
@@ -35,22 +31,10 @@ class MainActivity : BaseActivity(), OnSongClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mediaPlayer = MediaPlayer()
-
         checkAndRequestPermissions()
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewSongs)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        val songs = getSongsFromDevice(this)
-        if (songs.isNotEmpty()) {
-            val adapter = SongAdapter(songs,this)
-            recyclerView.adapter = adapter
-        } else {
-            Log.e("MainActivity", "No songs found on device.")
-        }
-
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.nav_bottom)
+
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragContainer, HomeFragment())
@@ -58,52 +42,62 @@ class MainActivity : BaseActivity(), OnSongClickListener {
         }
 
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
-            val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewSongs)
+            val recyclerView = findViewById<RecyclerView?>(R.id.recyclerViewSongs)
             val fragContainer = findViewById<FrameLayout>(R.id.fragContainer)
+
             when (menuItem.itemId) {
-                R.id.navHome -> {
-
-                    recyclerView.visibility = RecyclerView.VISIBLE
-                    fragContainer.visibility = FrameLayout.GONE
-
+                R.id.navPlaylist -> {
+                    stopMediaPlayer()
+                    replaceFragment(PlaylistFragment(), true)
                     true
                 }
-                R.id.navLibrary, R.id.navPlaylist -> {
-
-                    recyclerView.visibility = RecyclerView.GONE
+                R.id.navHome, R.id.navLibrary -> {
+                    recyclerView?.visibility = RecyclerView.GONE
                     fragContainer.visibility = FrameLayout.VISIBLE
 
                     val selectedFragment = when (menuItem.itemId) {
                         R.id.navLibrary -> LibraryFragment()
-                        R.id.navPlaylist -> PlaylistFragment()
+                        R.id.navHome -> HomeFragment()
                         else -> null
                     }
                     if (selectedFragment != null) {
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragContainer, selectedFragment)
-                            .commit()
+                        replaceFragment(selectedFragment, false)
                     }
                     true
                 }
                 else -> false
             }
         }
-    }
-    override fun onSongClick(song: Song) {
-        playAudio(song)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    supportFragmentManager.popBackStack()
+                } else {
+                    finish()
+                }
+            }
+        })
     }
 
-    private fun playAudio(song: Song) {
-        try {
-            mediaPlayer.reset()
-            mediaPlayer.setDataSource(this, Uri.parse(song.uri))
-            mediaPlayer.prepare()
-            mediaPlayer.start()
+    private fun replaceFragment(fragment: androidx.fragment.app.Fragment, addToBackStack: Boolean) {
+        val transaction = supportFragmentManager.beginTransaction()
+            .replace(R.id.fragContainer, fragment)
 
-            Log.d("MediaPlayer", "Đang chơi: ${song.title} by ${song.artist}")
-            Toast.makeText(this, "Đang chơi: ${song.title} by ${song.artist}", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Log.e("MediaPlayer", "Lỗi phát nhạc: ${song.title}", e)
+        if (addToBackStack) {
+            transaction.addToBackStack(null)
+        }
+
+        transaction.commit()
+    }
+
+    private fun stopMediaPlayer() {
+        mediaPlayer?.let {
+            if (it.isPlaying) {
+                it.stop()
+                it.release()
+            }
+            mediaPlayer = null
         }
     }
 
@@ -112,12 +106,7 @@ class MainActivity : BaseActivity(), OnSongClickListener {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> arrayOf(
                 Manifest.permission.READ_MEDIA_AUDIO
             )
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            )
-            else -> arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            )
+            else -> arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
         val neededPermissions = permissions.filter {
@@ -130,8 +119,6 @@ class MainActivity : BaseActivity(), OnSongClickListener {
                 neededPermissions.toTypedArray(),
                 REQUEST_CODE_STORAGE_PERMISSION
             )
-        } else {
-            loadSongsAndPlayFirst()
         }
     }
 
@@ -144,32 +131,10 @@ class MainActivity : BaseActivity(), OnSongClickListener {
         if (requestCode == REQUEST_CODE_STORAGE_PERMISSION) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 Log.d("Permission", "Permissions granted")
-                loadSongsAndPlayFirst()
             } else {
                 Log.e("Permission", "Permissions denied")
                 Toast.makeText(this, "Bạn đã từ chối cấp quyền", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Log.e("Permission", "Unexpected requestCode: $requestCode")
-        }
-    }
-
-
-    private fun loadSongsAndPlayFirst() {
-        val songs = getSongsFromDevice(this)
-        if (songs.isNotEmpty()) {
-            val firstSong = songs[0]
-            playAudio(firstSong)
-        } else {
-            Toast.makeText(this, "Không tìm thấy bài hát nào!", Toast.LENGTH_SHORT).show()
-            Log.e("MainActivity", "No songs found on device.")
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (::mediaPlayer.isInitialized) {
-            mediaPlayer.release()
         }
     }
 }

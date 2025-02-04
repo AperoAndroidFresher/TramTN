@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/noSongsView" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#000000">
 
     <TextView
-        android:id="@+id/txtplaylist"
-        android:layout_width="wrap_content"
+        android:id="@+id/tv_no_songs"
+        android:layout_width="234dp"
         android:layout_height="wrap_content"
-        android:text="@string/nav_bottom_playlist"
-        android:textSize="20dp"
-        android:textColor="#FFFFFF"/>
+        android:text="You don't have any playlists. Click the '+' button to add"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textAlignment="center"
+        android:padding="20dp" />
 
-</FrameLayout>
+    <ImageButton
+        android:id="@+id/btn_add_playlist"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/ic_no_playlist_add"
+        android:background="@android:color/transparent"
+        android:scaleType="centerInside" />
+</LinearLayout>

@@ -41,7 +41,7 @@ android {
 }
 
 dependencies {
-
+    implementation (libs.androidx.recyclerview.v121)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.material)
@@ -49,6 +49,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
