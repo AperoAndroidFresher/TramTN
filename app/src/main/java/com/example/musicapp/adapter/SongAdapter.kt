@@ -1,5 +1,6 @@
 package com.example.musicapp.adapter
 
+import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
@@ -15,12 +16,25 @@ import java.io.File
 
 class SongAdapter(
     private val songs: List<Song>,
-    private val onSongClickListener: OnSongClickListener
+    private val listener: OnSongClickListener
 ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
+    private var isGridLayout = false
+
+    fun setLayoutType(isGrid: Boolean) {
+        isGridLayout = isGrid
+        notifyDataSetChanged()
+    }
+    override fun getItemViewType(position: Int): Int {
+        return if (isGridLayout) {
+            R.layout.item_song_grid
+        } else {
+            R.layout.item_song
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
         val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_song, parent, false)
+            .inflate(viewType, parent, false)
         return SongViewHolder(itemView)
     }
 
@@ -45,7 +59,7 @@ class SongAdapter(
                 "Playing: ${song.title} by ${song.artist}",
                 Toast.LENGTH_SHORT
             ).show()
-            onSongClickListener.onSongClick(song)
+            listener.onSongClick(song)
         }
     }
 

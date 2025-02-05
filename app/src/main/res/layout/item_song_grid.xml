@@ -2,7 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp"
@@ -10,72 +10,75 @@
     android:background="#000000">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="159dp"
+        android:layout_height="191dp"
         android:background="#000000"
         android:padding="16dp">
 
         <ImageView
             android:id="@+id/songImage"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="98dp"
+            android:layout_height="92dp"
+            android:layout_marginBottom="9dp"
             android:background="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/songDuration"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.482"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
         <TextView
             android:id="@+id/songTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="128dp"
+            android:layout_height="23dp"
+            android:layout_marginBottom="5dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:paddingStart="16dp"
             android:text="@string/item_song_title"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toEndOf="@id/songImage"
-            app:layout_constraintTop_toTopOf="@id/songImage"
-            app:layout_constraintEnd_toStartOf="@id/songDuration"
+            app:layout_constraintBottom_toTopOf="@+id/songAuthor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             tools:ignore="RtlSymmetry" />
 
         <TextView
             android:id="@+id/songAuthor"
-            android:layout_width="0dp"
+            android:layout_width="75dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="76dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/item_author_name"
             android:textColor="#B0B0B0"
             android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="@id/songTitle"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/songTitle" />
+            tools:layout_editor_absoluteY="128dp" />
 
         <TextView
             android:id="@+id/songDuration"
             android:layout_width="65dp"
             android:layout_height="19dp"
+            android:layout_marginTop="1dp"
             android:textColor="#B0B0B0"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.929"
-            app:layout_constraintStart_toEndOf="@+id/songTitle"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.512" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/songAuthor" />
+
         <ImageButton
             android:id="@+id/btnOption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_option_item_playlist"
+            android:layout_marginEnd="16dp"
             android:background="@android:color/transparent"
+            android:src="@drawable/ic_option_item_playlist"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.0"
             app:tint="#FFFFFF" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

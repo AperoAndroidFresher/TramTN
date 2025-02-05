@@ -12,6 +12,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicapp.R
 import com.example.musicapp.fragments.HomeFragment
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
-            val recyclerView = findViewById<RecyclerView?>(R.id.recyclerViewSongs)
+            val recyclerView = findViewById<RecyclerView?>(R.id.recyclerView)
             val fragContainer = findViewById<FrameLayout>(R.id.fragContainer)
 
             when (menuItem.itemId) {
@@ -80,26 +81,30 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun replaceFragment(fragment: androidx.fragment.app.Fragment, addToBackStack: Boolean) {
-        val transaction = supportFragmentManager.beginTransaction()
-            .replace(R.id.fragContainer, fragment)
+    private fun replaceFragment(fragment: Fragment, addToBackStack: Boolean) {
+        if (!isFinishing && !supportFragmentManager.isStateSaved) {
+            val transaction = supportFragmentManager.beginTransaction()
+                .replace(R.id.fragContainer, fragment)
 
-        if (addToBackStack) {
-            transaction.addToBackStack(null)
+            if (addToBackStack) {
+                transaction.addToBackStack(null)
+            }
+
+            transaction.commitAllowingStateLoss()
         }
-
-        transaction.commit()
     }
+
 
     private fun stopMediaPlayer() {
-        mediaPlayer?.let {
-            if (it.isPlaying) {
-                it.stop()
-                it.release()
+        mediaPlayer?.apply {
+            if (isPlaying) {
+                stop()
+                release()
             }
-            mediaPlayer = null
         }
+        mediaPlayer = null
     }
+
 
     private fun checkAndRequestPermissions() {
         val permissions = when {
