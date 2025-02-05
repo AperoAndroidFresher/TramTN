@@ -40,6 +40,8 @@ android {
 }
 
 dependencies {
+    implementation (libs.com.github.bumptech.glide.glide)
+    annotationProcessor (libs.compiler)
     implementation (libs.androidx.recyclerview.v121)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

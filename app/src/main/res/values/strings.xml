@@ -26,7 +26,7 @@
     <string name="menu_nav_bottom_home">Home</string>
     <string name="menu_nav_bottom_library">Library</string>
     <string name="menu_nav_bottom_playlist">Playlist</string>
-    <string name="main_change_language" tools:ignore="MissingTranslation" translatable="false">Change Language</string>
+    <string name="main_change_language" translatable="false" tools:ignore="MissingTranslation">Change Language</string>
     <string name="ic_change_language" translatable="false">Change Language</string>
     <string name="item_song_title" translatable="false">Song Title</string>
     <string name="item_author_name" translatable="false">Author Name</string>
