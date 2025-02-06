@@ -52,18 +52,14 @@ class MainActivity : AppCompatActivity() {
                     replaceFragment(PlaylistFragment(), true)
                     true
                 }
-                R.id.navHome, R.id.navLibrary -> {
-                    recyclerView?.visibility = RecyclerView.GONE
+                R.id.navLibrary -> {
                     fragContainer.visibility = FrameLayout.VISIBLE
-
-                    val selectedFragment = when (menuItem.itemId) {
-                        R.id.navLibrary -> LibraryFragment()
-                        R.id.navHome -> HomeFragment()
-                        else -> null
-                    }
-                    if (selectedFragment != null) {
-                        replaceFragment(selectedFragment, false)
-                    }
+                    replaceFragment(LibraryFragment(), false)
+                    true
+                }
+                R.id.navHome -> {
+                    fragContainer.visibility = FrameLayout.VISIBLE
+                    replaceFragment(HomeFragment(), false)
                     true
                 }
                 else -> false

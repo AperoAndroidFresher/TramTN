@@ -1,4 +1,4 @@
-package com.example.musicapp.activities
+package com.example.musicapp.base
 
 import android.content.Context
 import android.content.res.Configuration

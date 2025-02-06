@@ -1,6 +1,10 @@
 package com.example.musicapp.utils
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import com.example.musicapp.models.Song
@@ -14,7 +18,8 @@ object SongUtils {
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.ALBUM_ID
+            MediaStore.Audio.Media.DATA,
+            MediaStore.Audio.Media.DURATION
         )
 
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
@@ -35,16 +40,17 @@ object SongUtils {
                         val id = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
                         val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)) ?: "Unknown Title"
                         val artist = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)) ?: "Unknown Artist"
-                        val albumId = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+                        val filePath = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA))
+                        val duration = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
 
-                        val albumArt = getAlbumArt(context, albumId)
+                        val albumArt = getAlbumArt(filePath)
 
-                        val songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.buildUpon()
-                            .appendPath(id)
-                            .build()
-                            .toString()
+                        val songUri = Uri.withAppendedPath(
+                            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                            id
+                        ).toString()
 
-                        val song = Song(id, title, artist, songUri, albumArt)
+                        val song = Song(id, title, artist, songUri, albumArt, duration)
                         songList.add(song)
 
                     } while (it.moveToNext())
@@ -57,27 +63,20 @@ object SongUtils {
         return songList
     }
 
-    private fun getAlbumArt(context: Context, albumId: Long): String? {
-        val albumUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
-        val projection = arrayOf(MediaStore.Audio.Albums.ALBUM_ART)
-
-        val selection = "${MediaStore.Audio.Albums._ID} = ?"
-        val selectionArgs = arrayOf(albumId.toString())
-
-        val cursor = context.contentResolver.query(
-            albumUri,
-            projection,
-            selection,
-            selectionArgs,
-            null
-        )
-
-        cursor?.use {
-            if (it.moveToFirst()) {
-                return it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART))
+    private fun getAlbumArt(filePath: String): Bitmap? {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(filePath)
+            val art = retriever.embeddedPicture
+            retriever.release()
+            if (art != null) {
+                BitmapFactory.decodeByteArray(art, 0, art.size)
+            } else {
+                null
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
-
-        return null
     }
 }

@@ -2,9 +2,11 @@
 <resources>
 
     <style name="Theme.MusicApp" parent="android:Theme.Material.Light.NoActionBar" />
+
     <!-- Base application theme. -->
     <style name="Base.Theme.MusicApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:popupMenuStyle">@style/CustomPopupMenu</item>
     </style>
 </resources>

@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicapp.R
 import com.example.musicapp.adapter.SongAdapter
 import com.example.musicapp.databinding.FragmentSongListBinding
-import com.example.musicapp.interfaces.OnSongClickListener
+import com.example.musicapp.base.listeners.OnSongClickListener
 import com.example.musicapp.models.Song
 import com.example.musicapp.utils.SongUtils.getSongsFromDevice
 
@@ -98,7 +98,7 @@ class SongListFragment : Fragment(), OnSongClickListener {
         try {
             mediaPlayer?.reset()
             mediaPlayer?.apply {
-                setDataSource(requireContext(), Uri.parse(song.uri))
+                setDataSource(requireContext(), Uri.parse(song.songUri))
                 prepare()
                 start()
                 Log.d("MediaPlayer", "Đang chơi: ${song.title} by ${song.artist}")

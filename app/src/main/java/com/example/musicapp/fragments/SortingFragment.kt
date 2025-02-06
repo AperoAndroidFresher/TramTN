@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicapp.adapter.SongAdapter
 import com.example.musicapp.databinding.FragmentSortingBinding
-import com.example.musicapp.interfaces.OnSongClickListener
+import com.example.musicapp.base.listeners.OnSongClickListener
 import com.example.musicapp.models.Song
 import com.example.musicapp.utils.SongUtils
 import java.util.Collections

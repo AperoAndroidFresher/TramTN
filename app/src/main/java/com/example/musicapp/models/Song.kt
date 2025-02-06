@@ -1,34 +1,37 @@
 package com.example.musicapp.models
 
-import android.content.Context
+import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
-import android.provider.MediaStore
-import android.util.Log
-import java.io.Serializable
 
 data class Song(
     val id: String,
     val title: String,
     val artist: String,
-    val uri: String,
-    val albumArt: String?
-): Parcelable {
+    val songUri: String,
+    val albumArt: Bitmap?,
+    val duration: Long
+) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString().toString(),
         parcel.readString().toString(),
         parcel.readString().toString(),
         parcel.readString().toString(),
-        parcel.readString()
-    ) {
+        parcel.readParcelable(Bitmap::class.java.classLoader),
+        parcel.readLong()
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(id)
+        parcel.writeString(title)
+        parcel.writeString(artist)
+        parcel.writeString(songUri)
+        parcel.writeParcelable(albumArt, flags)
+        parcel.writeLong(duration)
     }
 
     override fun describeContents(): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun writeToParcel(p0: Parcel, p1: Int) {
-        TODO("Not yet implemented")
+        return 0
     }
 
     companion object CREATOR : Parcelable.Creator<Song> {
@@ -41,5 +44,3 @@ data class Song(
         }
     }
 }
-
-

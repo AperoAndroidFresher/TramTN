@@ -5,7 +5,16 @@
         android:title="Rename"
         android:icon="@drawable/ic_playlist_rename"/>
     <item
+        android:id="@+id/menu_share"
+        android:title="Share (coming soon)"
+        android:icon="@drawable/ic_menu_song_list_share" />
+    <item
         android:id="@+id/menu_remove"
         android:title="Remove Playlist"
-        android:icon="@drawable/ic_playlist_remove"/>
+        android:icon="@drawable/ic_playlist_remove" />
+    <item
+        android:id="@+id/menu_add"
+        android:title="Add to Playlist"
+        android:icon="@drawable/ic_add_to_playlist" />
+
 </menu>

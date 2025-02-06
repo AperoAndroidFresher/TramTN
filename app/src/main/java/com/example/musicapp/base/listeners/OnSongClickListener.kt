@@ -1,4 +1,4 @@
-package com.example.musicapp.interfaces
+package com.example.musicapp.base.listeners
 
 import com.example.musicapp.models.Song
 
