@@ -18,6 +18,7 @@ import com.example.musicapp.activities.MainActivity
 import com.example.musicapp.databinding.ItemSongBinding
 import com.example.musicapp.databinding.ItemSongGridBinding
 import com.example.musicapp.base.listeners.OnSongClickListener
+import com.example.musicapp.dialogs.PlaylistDialogFragment
 import com.example.musicapp.fragments.PlaylistFragment
 import com.example.musicapp.models.Song
 
@@ -90,6 +91,7 @@ class SongAdapter(
             binding.btnOption.setOnClickListener { view ->
                 showPopupMenu(view, song, position)
             }
+
         }
     }
 
@@ -145,7 +147,7 @@ class SongAdapter(
         popupMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_rename -> {
-                    showRenameDialog(view.context, song, position)
+//                    showRenameDialog(view.context, song, position)
                     true
                 }
                 R.id.menu_remove -> {
@@ -153,7 +155,7 @@ class SongAdapter(
                     true
                 }
                 R.id.menu_add -> {
-                    showAddToPlaylistDialog(view.context, song)
+                    showPlaylistDialog(view.context, song)
                     true
                 }
                 R.id.menu_share -> true
@@ -162,38 +164,15 @@ class SongAdapter(
         }
         popupMenu.show()
     }
-    private fun showAddToPlaylistDialog(context: Context, song: Song) {
-        val fragment = (context as? MainActivity)?.supportFragmentManager?.findFragmentByTag("PlaylistFragment") as? PlaylistFragment
-        val playlists = fragment?.getPlaylists() ?: emptyList()
-
-        if (playlists.isEmpty()) {
-            openPlaylistFragment(context, song)
-        } else {
-            val playlistNames = playlists.map { it.title }.toTypedArray()
-
-            AlertDialog.Builder(context)
-                .setTitle("Chọn Playlist")
-                .setItems(playlistNames) { _, which ->
-                    val selectedPlaylist = playlists[which]
-//                    PlaylistFragment.addSongToPlaylist(context, selectedPlaylist.title, song)
-                }
-                .setNegativeButton("Hủy", null)
-                .show()
-        }
-    }
-    private fun openPlaylistFragment(context: Context, song: Song) {
+    private fun showPlaylistDialog(context: Context, song: Song) {
         if (context is MainActivity) {
-            val fragment = PlaylistFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable("songToAdd", song)
-                }
-            }
-            val fragmentTransaction = context.supportFragmentManager.beginTransaction()
-            fragmentTransaction.replace(R.id.fragContainer, fragment)
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
+            val playlists = context.getPlaylists()
+
+            val playlistDialog = PlaylistDialogFragment.newInstance(song)
+            playlistDialog.show(context.supportFragmentManager, "PlaylistDialogFragment")
         }
     }
+
 
     @SuppressLint("DefaultLocale")
     private fun formatDuration(duration: Long): String {
@@ -202,28 +181,6 @@ class SongAdapter(
         return String.format("%02d:%02d", minutes, seconds)
     }
 
-
-    private fun showRenameDialog(context: Context, song: Song, position: Int) {
-        val input = EditText(context)
-        input.setText(song.title)
-
-        val dialog = AlertDialog.Builder(context)
-            .setTitle("Rename Playlist")
-            .setView(input)
-            .setPositiveButton("OK") { _, _ ->
-                val newName = input.text.toString().trim()
-                if (newName.isNotEmpty()) {
-                    songs[position] = song.copy(title = newName)
-                    notifyItemChanged(position)
-                    Toast.makeText(context, "Playlist renamed to: $newName", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, "Tên không được để trống!", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .create()
-        dialog.show()
-    }
 
     private fun removeSong(position: Int) {
         songs.removeAt(position)

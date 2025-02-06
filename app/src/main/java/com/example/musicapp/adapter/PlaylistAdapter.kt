@@ -18,54 +18,34 @@ class PlaylistAdapter(
 ) : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
 
     inner class PlaylistViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(R.id.playlistTitle)
-        val songCount: TextView = view.findViewById(R.id.songCount)
-        val btnMore: ImageButton = view.findViewById(R.id.btnMore)
+        private val title: TextView = view.findViewById(R.id.playlistTitle)
+        private val songCount: TextView = view.findViewById(R.id.songCount)
+        private val btnMore: ImageButton = view.findViewById(R.id.btnMore)
 
-        fun updatePlaylists(newPlaylists: MutableList<Playlist>) {
-            playlists.clear()
-            playlists.addAll(newPlaylists)
-            notifyDataSetChanged()
-        }
         init {
             itemView.setOnClickListener {
-                val playlist = playlists[adapterPosition]
-                onPlaylistClick(playlist)
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onPlaylistClick(playlists[position])
+                }
             }
 
             btnMore.setOnClickListener {
-                val playlist = playlists[adapterPosition]
-                onRename(playlist)
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    showPopupMenu(it, playlists[position], position)
+                }
             }
         }
-
 
         fun bind(playlist: Playlist) {
             title.text = playlist.title
             songCount.text = "${playlist.songs.size} songs"
-
         }
 
-        private fun showPopupMenu(view: View, playlist: Playlist) {
+        private fun showPopupMenu(view: View, playlist: Playlist, position: Int) {
             val popupMenu = PopupMenu(view.context, view)
             popupMenu.menuInflater.inflate(R.menu.menu_playlist_options, popupMenu.menu)
-
-            try {
-                val fields = popupMenu.javaClass.getDeclaredFields()
-                for (field in fields) {
-                    if ("mPopup" == field.name) {
-                        field.isAccessible = true
-                        val menuPopupHelper = field.get(popupMenu)
-                        val classPopupHelper = Class.forName(menuPopupHelper.javaClass.name)
-                        val setForceShowIcon =
-                            classPopupHelper.getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
-                        setForceShowIcon.invoke(menuPopupHelper, true)
-                        break
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
 
             popupMenu.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
@@ -74,7 +54,7 @@ class PlaylistAdapter(
                         true
                     }
                     R.id.menu_remove -> {
-                        onRemove(playlist)
+                        removePlaylist(position)
                         true
                     }
                     else -> false
@@ -95,4 +75,18 @@ class PlaylistAdapter(
     }
 
     override fun getItemCount(): Int = playlists.size
+
+    fun updatePlaylists(newPlaylists: List<Playlist>) {
+        playlists.clear()
+        playlists.addAll(newPlaylists)
+        notifyDataSetChanged()
+    }
+
+    private fun removePlaylist(position: Int) {
+        if (position in playlists.indices) {
+            playlists.removeAt(position)
+            notifyItemRemoved(position)
+            notifyItemRangeChanged(position, playlists.size)
+        }
+    }
 }

@@ -15,14 +15,18 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicapp.R
+import com.example.musicapp.dialogs.PlaylistDialogFragment
 import com.example.musicapp.fragments.HomeFragment
 import com.example.musicapp.fragments.LibraryFragment
 import com.example.musicapp.fragments.PlaylistFragment
 import com.example.musicapp.fragments.SongListFragment
+import com.example.musicapp.models.Playlist
+import com.example.musicapp.models.Song
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
+    private val playlists = mutableListOf<Playlist>()
 
     companion object {
         const val REQUEST_CODE_STORAGE_PERMISSION = 1001
@@ -33,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         checkAndRequestPermissions()
+//        playlists.add(Playlist(id = 1, title = "Favorites", songs = mutableListOf()))
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.nav_bottom)
 
@@ -43,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
-            val recyclerView = findViewById<RecyclerView?>(R.id.recyclerView)
+
             val fragContainer = findViewById<FrameLayout>(R.id.fragContainer)
 
             when (menuItem.itemId) {
@@ -66,6 +71,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (supportFragmentManager.backStackEntryCount > 0) {
@@ -75,6 +81,20 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+    fun getPlaylists(): List<Playlist> {
+        return playlists
+    }
+    fun addPlaylist(name: String, song: Song) {
+        val newId = (playlists.maxOfOrNull { it.id } ?: 0) + 1
+        val newPlaylist = Playlist(newId, name, mutableListOf())
+        playlists.add(newPlaylist)
+
+        val fragment = supportFragmentManager.findFragmentByTag("PlaylistFragment") as? PlaylistFragment
+        fragment?.updatePlaylists(playlists)
+
+        val playlistDialog = PlaylistDialogFragment.newInstance(song)
+        playlistDialog.show(supportFragmentManager, "PlaylistDialogFragment")
     }
 
     private fun replaceFragment(fragment: Fragment, addToBackStack: Boolean) {

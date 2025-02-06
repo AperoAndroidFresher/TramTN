@@ -100,5 +100,12 @@ class PlaylistFragment : Fragment() {
         transaction.addToBackStack(null)
         transaction.commit()
     }
+    fun updatePlaylists(newPlaylists: List<Playlist>) {
+        playlists.clear()
+        playlists.addAll(newPlaylists)
+        adapter.notifyDataSetChanged()
+        updateUI()
+    }
+
 
 }
