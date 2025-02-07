@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -40,6 +40,8 @@ android {
 }
 
 dependencies {
+    implementation (libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
     implementation (libs.com.github.bumptech.glide.glide)
     annotationProcessor (libs.compiler)
     implementation (libs.androidx.recyclerview.v121)

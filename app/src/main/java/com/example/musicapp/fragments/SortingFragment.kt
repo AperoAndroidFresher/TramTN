@@ -15,6 +15,7 @@ import com.example.musicapp.databinding.FragmentSortingBinding
 import com.example.musicapp.base.listeners.OnSongClickListener
 import com.example.musicapp.models.Song
 import com.example.musicapp.utils.SongUtils
+import androidx.fragment.app.setFragmentResult
 import java.util.Collections
 
 class SortingFragment : Fragment() {
@@ -22,11 +23,6 @@ class SortingFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var songAdapter: SongAdapter
     private lateinit var songs: MutableList<Song>
-    private var callback: OnSortingCompleteListener? = null
-
-    interface OnSortingCompleteListener {
-        fun onSortingComplete(sortedSongs: List<Song>)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,15 +63,15 @@ class SortingFragment : Fragment() {
         }
 
         btnConfirm.setOnClickListener {
-            callback?.onSortingComplete(songs)
+            val bundle = Bundle().apply {
+                putParcelableArrayList("sortedSongs", ArrayList(songs))
+            }
+            setFragmentResult("sorting_result", bundle)
+
             Toast.makeText(requireContext(), "Sắp xếp thành công", Toast.LENGTH_SHORT).show()
             parentFragmentManager.popBackStack()
         }
 
         return binding.root
-    }
-
-    fun setOnSortingCompleteListener(listener: OnSortingCompleteListener) {
-        callback = listener
     }
 }

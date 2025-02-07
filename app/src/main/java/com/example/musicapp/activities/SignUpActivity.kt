@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.widget.*
 import com.example.musicapp.R
 import com.example.musicapp.base.BaseActivity
+import com.example.musicapp.data.database.UserDatabase
+import com.example.musicapp.data.entity.User
+import kotlin.concurrent.thread
 
 
 class SignUpActivity : BaseActivity() {
@@ -39,6 +42,9 @@ class SignUpActivity : BaseActivity() {
         signUpButton.setOnClickListener {
             finish()
         }
+
+        val db = UserDatabase.getDatabase(this)
+        val userDao = db.userDao()
 
         signUpButton.setOnClickListener {
             val username = usernameField.text.toString().trim()
@@ -85,10 +91,20 @@ class SignUpActivity : BaseActivity() {
 
 
             if (isValid) {
-                showToast("Sign Up Successful!")
-                val intent = Intent(this, LoginActivity::class.java)
-                startActivity(intent)
-                finish()
+                val user = User(username = username, password = password, email = email)
+                thread {
+                    val userId = userDao.insertUser(user)
+                    runOnUiThread {
+                        if (userId != -1L) {
+                            showToast("Sign Up Successful!")
+                            val intent = Intent(this, LoginActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }else{
+                            showToast("Sign Up Failed!")
+                        }
+                    }
+                }.start()
             }
         }
     }

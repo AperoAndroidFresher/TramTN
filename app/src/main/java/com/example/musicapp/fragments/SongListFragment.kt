@@ -10,15 +10,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.musicapp.R
 import com.example.musicapp.adapter.SongAdapter
 import com.example.musicapp.databinding.FragmentSongListBinding
 import com.example.musicapp.base.listeners.OnSongClickListener
 import com.example.musicapp.models.Song
 import com.example.musicapp.utils.SongUtils.getSongsFromDevice
+import androidx.fragment.app.setFragmentResultListener
 
 class SongListFragment : Fragment(), OnSongClickListener {
 
@@ -41,30 +40,12 @@ class SongListFragment : Fragment(), OnSongClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         mediaPlayer = MediaPlayer()
-
         songList = getSongsFromDevice(requireContext()).toMutableList()
+
         if (songList.isNotEmpty()) {
             songAdapter = SongAdapter(songList, this, isGridLayout)
             binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
             binding.recyclerView.adapter = songAdapter
-
-            val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
-                ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-                override fun onMove(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder
-                ): Boolean {
-                    val fromPosition = viewHolder.adapterPosition
-                    val toPosition = target.adapterPosition
-                    songList.add(toPosition, songList.removeAt(fromPosition))
-                    songAdapter.notifyItemMoved(fromPosition, toPosition)
-                    return true
-                }
-
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
-            })
-            touchHelper.attachToRecyclerView(binding.recyclerView)
         } else {
             Log.e("SongListFragment", "Không tìm thấy bài hát nào trên thiết bị.")
         }
@@ -75,18 +56,17 @@ class SongListFragment : Fragment(), OnSongClickListener {
 
         binding.btnSort.setOnClickListener {
             val sortingFragment = SortingFragment()
-            sortingFragment.setOnSortingCompleteListener(object : SortingFragment.OnSortingCompleteListener {
-                override fun onSortingComplete(sortedSongs: List<Song>) {
-                    songList.clear()
-                    songList.addAll(sortedSongs)
-                    songAdapter.notifyDataSetChanged()
-                }
-            })
-
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragContainer, sortingFragment)
                 .addToBackStack(null)
                 .commit()
+        }
+        
+        parentFragmentManager.setFragmentResultListener("sorting_result", this) { _, bundle ->
+            val sortedSongs = bundle.getParcelableArrayList<Song>("sortedSongs")
+            sortedSongs?.let {
+                updatePlaylist(it)
+            }
         }
     }
 
@@ -109,6 +89,12 @@ class SongListFragment : Fragment(), OnSongClickListener {
         }
     }
 
+    private fun updatePlaylist(sortedSongs: List<Song>) {
+        songList.clear()
+        songList.addAll(sortedSongs)
+        songAdapter.notifyDataSetChanged()
+    }
+
     private fun toggleLayout() {
         isGridLayout = !isGridLayout
         binding.recyclerView.layoutManager = if (isGridLayout) {
@@ -129,4 +115,3 @@ class SongListFragment : Fragment(), OnSongClickListener {
         _binding = null
     }
 }
-

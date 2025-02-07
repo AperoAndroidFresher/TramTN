@@ -6,6 +6,8 @@ import android.view.View
 import android.widget.*
 import com.example.musicapp.R
 import com.example.musicapp.base.BaseActivity
+import com.example.musicapp.data.database.UserDatabase
+import kotlin.concurrent.thread
 
 class LoginActivity : BaseActivity() {
 
@@ -59,22 +61,24 @@ class LoginActivity : BaseActivity() {
 
             if (!isValid) return@setOnClickListener
 
-            if (!userList.containsKey(username)) {
-                usernameError.text = "Username does not exist"
-                usernameError.visibility = View.VISIBLE
-                return@setOnClickListener
+            thread {
+                val db = UserDatabase.getDatabase(this)
+                val userDao = db.userDao()
+                val user = userDao.checkUser(username, password)
+
+                runOnUiThread {
+                    if (user != null) {
+                        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        passwordError.text = "Invalid username or password"
+                        passwordError.visibility = View.VISIBLE
+                    }
+                }
             }
 
-            if (userList[username] != password) {
-                passwordError.text = "Incorrect password"
-                passwordError.visibility = View.VISIBLE
-                return@setOnClickListener
-            }
-
-            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
         }
 
         signupText.setOnClickListener {
