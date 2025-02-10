@@ -3,12 +3,12 @@
 <item
     android:id="@+id/navHome"
     android:icon="@drawable/ic_menu_nav_bottom_home"
-    android:title="@string/menu_nav_bottom_home"
-    android:textColor="#00C0FF" />
+    android:title="@string/menu_nav_bottom_home" />
 <item
     android:id="@+id/navLibrary"
     android:icon="@drawable/ic_menu_nav_bottom_library"
-    android:title="@string/menu_nav_bottom_library"/>
+    android:title="@string/menu_nav_bottom_library"
+    />
 <item
     android:id="@+id/navPlaylist"
     android:icon="@drawable/ic_menu_nav_bottom_playlist"

@@ -1,5 +1,7 @@
 package com.example.musicapp.dialogs
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.*
 import android.widget.Button
@@ -51,10 +53,9 @@ class CreatePlaylistDialog(
     }
 
     override fun onStart() {
-        super.onStart()
-        dialog?.window?.setLayout(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
+            super.onStart()
+            dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog?.window?.setLayout((resources.displayMetrics.widthPixels * 0.7).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
     }
-}
+

@@ -4,13 +4,14 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#3E3E3E">>
+    android:background="@drawable/bg_dialog_create_playlist">
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Choose playlist"
+        android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal" />
@@ -31,6 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="You don't have any playlists. Click the '+' button to add"
+                android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:textAlignment="center"
                 android:padding="20dp"/>

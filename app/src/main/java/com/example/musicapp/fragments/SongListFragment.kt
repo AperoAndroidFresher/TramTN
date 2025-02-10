@@ -54,19 +54,30 @@ class SongListFragment : Fragment(), OnSongClickListener {
             toggleLayout()
         }
 
+//        binding.btnSort.setOnClickListener {
+//            val sortingFragment = SortingFragment()
+//            parentFragmentManager.beginTransaction()
+//                .replace(R.id.fragContainer, sortingFragment)
+//                .addToBackStack(null)
+//                .commit()
+//        }
+//
+//        parentFragmentManager.setFragmentResultListener("sorting_result", this) { _, bundle ->
+//            val sortedSongs = bundle.getParcelableArrayList<Song>("sortedSongs")
+//            sortedSongs?.let {
+//                updatePlaylist(it)
+//            }
+//        }
         binding.btnSort.setOnClickListener {
-            val sortingFragment = SortingFragment()
+            val sortingFragment = SortingFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean("isGridLayout", isGridLayout)
+                }
+            }
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragContainer, sortingFragment)
                 .addToBackStack(null)
                 .commit()
-        }
-        
-        parentFragmentManager.setFragmentResultListener("sorting_result", this) { _, bundle ->
-            val sortedSongs = bundle.getParcelableArrayList<Song>("sortedSongs")
-            sortedSongs?.let {
-                updatePlaylist(it)
-            }
         }
     }
 
@@ -107,6 +118,7 @@ class SongListFragment : Fragment(), OnSongClickListener {
             if (isGridLayout) R.drawable.ic_grid_form else R.drawable.ic_linear_form
         )
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

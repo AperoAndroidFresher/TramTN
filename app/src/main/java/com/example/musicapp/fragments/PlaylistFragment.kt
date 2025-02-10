@@ -1,5 +1,7 @@
 package com.example.musicapp.fragments
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.*
 import android.widget.ImageButton
@@ -21,6 +23,7 @@ class PlaylistFragment : Fragment() {
     private lateinit var emptyView: TextView
     private lateinit var addButton: ImageButton
     private lateinit var recyclerView: RecyclerView
+    private lateinit var titleTextView: TextView
     private lateinit var adapter: PlaylistAdapter
 
     private val playlists = mutableListOf<Playlist>()
@@ -39,6 +42,7 @@ class PlaylistFragment : Fragment() {
         emptyView = view.findViewById(R.id.tvNoPlaylist)
         addButton = view.findViewById(R.id.btnAddPlaylist)
         recyclerView = view.findViewById(R.id.rvPlaylist)
+        titleTextView = view.findViewById(R.id.title)
 
         adapter = PlaylistAdapter(
             playlists,
@@ -70,20 +74,21 @@ class PlaylistFragment : Fragment() {
                 adapter.notifyItemInserted(playlists.size - 1)
                 updateUI()
             }
-            dialog.show(childFragmentManager, "CreatePlaylistDialog")
+            dialog.show(parentFragmentManager, "CreatePlaylistDialog")
         }
         updateUI()
 
     }
-    fun getPlaylists(): List<Playlist> {
-        return playlists
-    }
 
     private fun updateUI() {
         if (playlists.isEmpty()) {
+            titleTextView.visibility = View.GONE
             emptyView.visibility = View.VISIBLE
             recyclerView.visibility = View.GONE
+            addButton.visibility = View.VISIBLE
         } else {
+            titleTextView.visibility = View.VISIBLE
+            addButton.visibility = View.GONE
             emptyView.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
         }

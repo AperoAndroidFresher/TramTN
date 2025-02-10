@@ -158,8 +158,8 @@ class PlaylistDialogFragment : DialogFragment() {
     }
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.parseColor("#3E3E3E")))
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setLayout((resources.displayMetrics.widthPixels * 0.7).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
 
