@@ -44,30 +44,26 @@ class SongListFragment : Fragment(), OnSongClickListener {
 
         if (songList.isNotEmpty()) {
             songAdapter = SongAdapter(songList, this, isGridLayout)
-            binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+            binding.recyclerView.layoutManager = if (isGridLayout) {
+                GridLayoutManager(requireContext(), 2)
+            } else {
+                LinearLayoutManager(requireContext())
+            }
             binding.recyclerView.adapter = songAdapter
-        } else {
-            Log.e("SongListFragment", "Không tìm thấy bài hát nào trên thiết bị.")
+        }
+        setFragmentResultListener("sorting_result") { _, bundle ->
+            val sortedSongs = bundle.getParcelableArrayList<Song>("sortedSongs")
+            isGridLayout = bundle.getBoolean("isGridLayout", isGridLayout)
+
+            if (!sortedSongs.isNullOrEmpty()) {
+                updatePlaylist(sortedSongs)
+            }
         }
 
         binding.toggleLayoutButton.setOnClickListener {
             toggleLayout()
         }
 
-//        binding.btnSort.setOnClickListener {
-//            val sortingFragment = SortingFragment()
-//            parentFragmentManager.beginTransaction()
-//                .replace(R.id.fragContainer, sortingFragment)
-//                .addToBackStack(null)
-//                .commit()
-//        }
-//
-//        parentFragmentManager.setFragmentResultListener("sorting_result", this) { _, bundle ->
-//            val sortedSongs = bundle.getParcelableArrayList<Song>("sortedSongs")
-//            sortedSongs?.let {
-//                updatePlaylist(it)
-//            }
-//        }
         binding.btnSort.setOnClickListener {
             val sortingFragment = SortingFragment().apply {
                 arguments = Bundle().apply {
@@ -104,6 +100,13 @@ class SongListFragment : Fragment(), OnSongClickListener {
         songList.clear()
         songList.addAll(sortedSongs)
         songAdapter.notifyDataSetChanged()
+
+        binding.recyclerView.layoutManager = if (isGridLayout) {
+            GridLayoutManager(requireContext(), 2)
+        } else {
+            LinearLayoutManager(requireContext())
+        }
+        songAdapter.setLayoutType(isGridLayout)
     }
 
     private fun toggleLayout() {

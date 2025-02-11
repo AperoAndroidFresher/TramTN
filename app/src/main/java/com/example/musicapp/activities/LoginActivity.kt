@@ -4,9 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.musicapp.R
 import com.example.musicapp.base.BaseActivity
 import com.example.musicapp.data.database.UserDatabase
+import com.example.musicapp.viewmodel.LoginViewModel
 import kotlin.concurrent.thread
 
 class LoginActivity : BaseActivity() {
@@ -18,6 +22,15 @@ class LoginActivity : BaseActivity() {
     private lateinit var loginButton: Button
     private lateinit var signupText: TextView
     private lateinit var changeLanguageButton: Button
+
+    private val loginViewModel: LoginViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val userDao = UserDatabase.getDatabase(applicationContext).userDao()
+                return LoginViewModel(userDao) as T
+            }
+        }
+    }
 
     private val userList = hashMapOf(
         "tram" to "Tram123"
@@ -58,27 +71,19 @@ class LoginActivity : BaseActivity() {
                 passwordError.visibility = View.VISIBLE
                 isValid = false
             }
-
-            if (!isValid) return@setOnClickListener
-
-            thread {
-                val db = UserDatabase.getDatabase(this)
-                val userDao = db.userDao()
-                val user = userDao.checkUser(username, password)
-
-                runOnUiThread {
-                    if (user != null) {
+            if (isValid) {
+                loginViewModel.login(username, password) { success ->
+                    if (success) {
                         Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this, MainActivity::class.java)
                         startActivity(intent)
                         finish()
-                    } else {
+                    }else{
                         passwordError.text = "Invalid username or password"
                         passwordError.visibility = View.VISIBLE
                     }
                 }
             }
-
         }
 
         signupText.setOnClickListener {

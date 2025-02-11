@@ -3,10 +3,14 @@ package com.example.musicapp.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.musicapp.R
 import com.example.musicapp.base.BaseActivity
 import com.example.musicapp.data.database.UserDatabase
 import com.example.musicapp.data.entity.User
+import com.example.musicapp.viewmodel.SignUpViewModel
 import kotlin.concurrent.thread
 
 
@@ -21,6 +25,15 @@ class SignUpActivity : BaseActivity() {
     private lateinit var passwordErrorText: TextView
     private lateinit var emailErrorText: TextView
     private lateinit var backArrow: ImageView
+    private val signUpViewModel : SignUpViewModel by viewModels(){
+        object : ViewModelProvider.Factory{
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val userDao = UserDatabase.getDatabase(applicationContext).userDao()
+                return SignUpViewModel(userDao) as T
+            }
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +56,6 @@ class SignUpActivity : BaseActivity() {
             finish()
         }
 
-        val db = UserDatabase.getDatabase(this)
-        val userDao = db.userDao()
 
         signUpButton.setOnClickListener {
             val username = usernameField.text.toString().trim()
@@ -88,23 +99,17 @@ class SignUpActivity : BaseActivity() {
                 emailErrorText.visibility = TextView.VISIBLE
                 isValid = false
             }
-
-
-            if (isValid) {
-                val user = User(username = username, password = password, email = email)
-                thread {
-                    val userId = userDao.insertUser(user)
-                    runOnUiThread {
-                        if (userId != -1L) {
-                            showToast("Sign Up Successful!")
-                            val intent = Intent(this, LoginActivity::class.java)
-                            startActivity(intent)
-                            finish()
-                        }else{
-                            showToast("Sign Up Failed!")
-                        }
+            if (isValid){
+                signUpViewModel.signUp(username,password,email) { success ->
+                    if (success) {
+                        showToast("Sign up successful")
+                        val intent = Intent(this, LoginActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }else{
+                        showToast("Sign up failed")
                     }
-                }.start()
+                }
             }
         }
     }

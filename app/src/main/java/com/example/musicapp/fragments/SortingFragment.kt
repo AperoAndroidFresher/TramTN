@@ -16,6 +16,7 @@ import com.example.musicapp.base.listeners.OnSongClickListener
 import com.example.musicapp.models.Song
 import com.example.musicapp.utils.SongUtils
 import androidx.fragment.app.setFragmentResult
+import androidx.recyclerview.widget.GridLayoutManager
 import java.util.Collections
 
 class SortingFragment : Fragment() {
@@ -33,24 +34,37 @@ class SortingFragment : Fragment() {
         val btnBack: ImageButton = binding.btnCancel
         val btnConfirm: ImageButton = binding.btnConfirm
 
+        val isGridLayout = arguments?.getBoolean("isGridLayout", false) ?: false
         songs = SongUtils.getSongsFromDevice(requireContext()).toMutableList()
 
         songAdapter = SongAdapter(songs, object : OnSongClickListener {
             override fun onSongClick(song: Song) {
                 Toast.makeText(requireContext(), "Đã chọn bài hát: ${song.title}", Toast.LENGTH_SHORT).show()
             }
-        }, isGridLayout = false)
-
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        }, isGridLayout)
+        recyclerView.layoutManager = if (isGridLayout) {
+            GridLayoutManager(requireContext(), 2)
+        } else {
+            LinearLayoutManager(requireContext())
+        }
         recyclerView.adapter = songAdapter
 
         val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
-            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN or
+                    (if (isGridLayout) ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT else 0), 0
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
                 val fromPosition = viewHolder.adapterPosition
                 val toPosition = target.adapterPosition
+
+
                 Collections.swap(songs, fromPosition, toPosition)
                 songAdapter.notifyItemMoved(fromPosition, toPosition)
+
                 return true
             }
 

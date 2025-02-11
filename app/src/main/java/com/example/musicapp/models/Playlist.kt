@@ -5,4 +5,3 @@ data class Playlist(
     var title: String,
     val songs: MutableList<Song>
 )
-
