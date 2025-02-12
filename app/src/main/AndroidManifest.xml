@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -18,11 +20,11 @@
         android:theme="@style/Theme.MusicApp"
         tools:targetApi="31">
         <activity
-            android:name=".activities.PlayerActivity"
+            android:name=".ui.player.PlayerActivity"
             android:exported="false" />
 
         <receiver
-            android:name=".receivers.AudioFileReceiver"
+            android:name=".ui.Song.receivers.AudioFileReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_SCANNER_FINISHED" />
@@ -30,7 +32,7 @@
         </receiver>
 
         <activity
-            android:name=".activities.LoginActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MusicApp">
@@ -41,11 +43,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.SignUpActivity"
+            android:name=".ui.signup.SignUpActivity"
             android:exported="true" />
-        <activity
-            android:name=".activities.MainActivity"
-            android:exported="true" />
+<!--        <activity-->
+<!--            android:name=".ui.main.MainActivity"-->
+<!--            android:exported="true" />-->
     </application>
 
 </manifest>

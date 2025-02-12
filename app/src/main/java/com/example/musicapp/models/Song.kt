@@ -9,7 +9,7 @@ data class Song(
     val title: String,
     val artist: String,
     val songUri: String,
-    val albumArt: Bitmap?,
+    val albumArt: String,
     val duration: Long
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
@@ -17,7 +17,7 @@ data class Song(
         parcel.readString().toString(),
         parcel.readString().toString(),
         parcel.readString().toString(),
-        parcel.readParcelable(Bitmap::class.java.classLoader),
+        parcel.readString().toString(),
         parcel.readLong()
     )
 
@@ -26,7 +26,7 @@ data class Song(
         parcel.writeString(title)
         parcel.writeString(artist)
         parcel.writeString(songUri)
-        parcel.writeParcelable(albumArt, flags)
+        parcel.writeString(albumArt)
         parcel.writeLong(duration)
     }
 

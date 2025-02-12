@@ -44,6 +44,10 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation (libs.androidx.lifecycle.viewmodel.ktx)
     implementation (libs.androidx.lifecycle.livedata.ktx)
+    implementation (libs.retrofit2.retrofit)
+    implementation (libs.converter.gson)
+    implementation (libs.okhttp)
+    implementation (libs.kotlinx.coroutines.android)
 
     implementation (libs.com.github.bumptech.glide.glide)
     annotationProcessor (libs.compiler)

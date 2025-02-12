@@ -19,7 +19,8 @@ object SongUtils {
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.DURATION
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.ALBUM_ID
         )
 
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
@@ -42,15 +43,14 @@ object SongUtils {
                         val artist = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)) ?: "Unknown Artist"
                         val filePath = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA))
                         val duration = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
-
-                        val albumArt = getAlbumArt(filePath)
+                        val albumId = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
 
                         val songUri = Uri.withAppendedPath(
                             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                             id
                         ).toString()
 
-                        val song = Song(id, title, artist, songUri, albumArt, duration)
+                        val song = Song(id, title, artist, songUri, "content://media/external/audio/albumart/$albumId", duration)
                         songList.add(song)
 
                     } while (it.moveToNext())
