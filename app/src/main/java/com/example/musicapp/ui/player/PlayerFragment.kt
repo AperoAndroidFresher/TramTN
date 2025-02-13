@@ -22,7 +22,11 @@ class PlayerFragment : Fragment() {
     private val handler = Handler(Looper.getMainLooper())
 
     private var songList: List<Song> = listOf()
+    private var shuffledList: MutableList<Song> = mutableListOf()
+    private var originalList: List<Song> = listOf()
     private var currentSongIndex: Int = -1
+    private var isRepeatEnabled = false
+    private var isShuffleEnabled = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,7 +39,8 @@ class PlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        songList = arguments?.getParcelableArrayList("SongList") ?: listOf()
+        originalList = arguments?.getParcelableArrayList("SongList") ?: listOf()
+        songList = originalList
 
         currentSong = arguments?.getParcelable("Selected Song")
 
@@ -61,8 +66,19 @@ class PlayerFragment : Fragment() {
             playPreviousSong()
         }
 
+        binding.btnRepeat.setOnClickListener {
+            isRepeatEnabled = !isRepeatEnabled
+            val color = if (isRepeatEnabled) R.color.white else R.color.gray
+            binding.btnRepeat.setColorFilter(resources.getColor(color, null))
+        }
+
+        binding.btnShuffle.setOnClickListener {
+            toggleShuffle()
+        }
+
         setupSeekBar()
     }
+
     private fun setupSeekBar() {
         binding.seekBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
@@ -98,6 +114,10 @@ class PlayerFragment : Fragment() {
             binding.tvTotalTime.text = formatDuration(duration.toLong())
 
             handler.post(updateSeekBar)
+
+            setOnCompletionListener {
+                playNextSong()
+            }
         }
     }
 
@@ -130,6 +150,21 @@ class PlayerFragment : Fragment() {
         }
     }
 
+    private fun toggleShuffle() {
+        isShuffleEnabled = !isShuffleEnabled
+        val color = if (isShuffleEnabled) R.color.white else R.color.gray
+        binding.btnShuffle.setColorFilter(resources.getColor(color, null))
+
+        if (isShuffleEnabled) {
+            shuffledList = originalList.shuffled().toMutableList()
+            currentSongIndex = shuffledList.indexOfFirst { it.songUri == currentSong?.songUri }
+            songList = shuffledList
+        } else {
+            songList = originalList
+            currentSongIndex = songList.indexOfFirst { it.songUri == currentSong?.songUri }
+        }
+    }
+
     private fun playNextSong() {
         if (songList.isEmpty()) {
             Log.e("PlayerFragment", "Song list is empty!")
@@ -138,14 +173,20 @@ class PlayerFragment : Fragment() {
 
         if (currentSongIndex < songList.size - 1) {
             currentSongIndex++
-            Log.d("PlayerFragment", "Next song index: $currentSongIndex")
-            currentSong = songList[currentSongIndex]
-            currentSong?.let {
-                updateUI(it)
-                playAudio(it)
-            }
         } else {
-            Log.d("PlayerFragment", "Already at the last song!")
+            if (isRepeatEnabled) {
+                currentSongIndex = 0
+            } else {
+                Log.d("PlayerFragment", "End of playlist, repeat is off.")
+                return
+            }
+        }
+
+        Log.d("PlayerFragment", "Next song index: $currentSongIndex")
+        currentSong = songList[currentSongIndex]
+        currentSong?.let {
+            updateUI(it)
+            playAudio(it)
         }
     }
 
