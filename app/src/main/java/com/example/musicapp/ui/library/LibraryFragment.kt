@@ -24,9 +24,11 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.musicapp.base.listeners.OnSongClickListener
 import com.example.musicapp.data.remote.ApiClient
+import com.example.musicapp.ui.player.PlayerFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 class LibraryFragment : Fragment() {
     private var _binding: FragmentLibraryBinding? = null
@@ -81,25 +83,25 @@ class LibraryFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
+                binding.progressBar.visibility = View.VISIBLE
+
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.build().getSongs()
                 }
                 Log.d("LibraryFragment", "Response: $response")
-//                if (response.isSuccessful && response.body() != null) {
-//                    val remoteSongs = response.body()!!.songs
 
-                    songList.clear()
-                    songList.addAll(response.map { remote ->
-                        Song(
-                            id = remote.title.hashCode().toString(),
-                            title = remote.title,
-                            artist = remote.artist,
-                            songUri = remote.path,
-                            albumArt = "",
-                            duration = remote.duration
-                        )
-                    })
-                    setupRecyclerView()
+                songList.clear()
+                songList.addAll(response.map { remote ->
+                    Song(
+                        id = UUID.randomUUID().toString(),
+                        title = remote.title,
+                        artist = remote.artist,
+                        songUri = remote.path,
+                        albumArt = "",
+                        duration = remote.duration
+                    )
+                })
+                withContext(Dispatchers.Main) {
                     if (songList.isNotEmpty()) {
                         binding.recyclerView.visibility = View.VISIBLE
                         binding.layoutError.visibility = View.GONE
@@ -107,10 +109,8 @@ class LibraryFragment : Fragment() {
                         binding.layoutError.visibility = View.VISIBLE
                     }
                     songAdapter.notifyDataSetChanged()
+                }
 
-//                } else {
-                    binding.layoutError.visibility = View.VISIBLE
-//                }
             } catch (e: Exception) {
                 Log.e("LibraryFragment", "Lỗi gọi API: ${e.message}", e)
                 binding.layoutError.visibility = View.VISIBLE
@@ -118,6 +118,7 @@ class LibraryFragment : Fragment() {
                 binding.progressBar.visibility = View.GONE
             }
         }
+
     }
 
     private fun updateTabUI() {
@@ -136,15 +137,25 @@ class LibraryFragment : Fragment() {
     private fun setupRecyclerView() {
         songAdapter = SongAdapter(songList, object : OnSongClickListener {
             override fun onSongClick(song: Song) {
-                playAudio(song)
-                Toast.makeText(requireContext(), "Playing: ${song.title}", Toast.LENGTH_SHORT).show()
+                openPlayerFragment(song)
             }
         }, isGridLayout = false)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.adapter = songAdapter
     }
-
+    private fun openPlayerFragment(song: Song) {
+        val playerFragment = PlayerFragment().apply {
+            arguments = Bundle().apply {
+                putParcelableArrayList("SongList", ArrayList(songList))
+                putParcelable("Selected Song", song)
+            }
+        }
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragContainer, playerFragment)
+            .addToBackStack(null)
+            .commit()
+    }
 
     private fun loadSongs(context: Context) {
         songList.clear()
@@ -161,20 +172,6 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    private fun playAudio(song: Song) {
-        try {
-            mediaPlayer?.release()
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(requireContext(), Uri.parse(song.songUri))
-                prepare()
-                start()
-            }
-            Log.d("MediaPlayer", "Đang chơi: ${song.title} by ${song.artist}")
-            Toast.makeText(requireContext(), "Đang chơi: ${song.title} by ${song.artist}", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Log.e("MediaPlayer", "Lỗi phát nhạc: ${song.title}", e)
-        }
-    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

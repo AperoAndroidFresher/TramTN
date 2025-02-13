@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.musicapp.data.local.dao.UserDao
 import com.example.musicapp.data.local.entity.User
 
-@Database(entities = [User::class], version = 1)
+@Database(entities = [User::class], version = 2)
 abstract class UserDatabase : RoomDatabase(){
     abstract fun userDao(): UserDao
 
@@ -21,7 +21,8 @@ abstract class UserDatabase : RoomDatabase(){
                     context.applicationContext,
                     UserDatabase::class.java,
                     "user_database"
-                    ).build()
+                    )
+                    .build()
                 instance = newInstance
                 newInstance
             }

@@ -23,7 +23,6 @@ import com.example.musicapp.models.Song
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
-//    private var mediaPlayer: MediaPlayer? = null
     private val playlists = mutableListOf<Playlist>()
 
     companion object {
@@ -35,7 +34,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         checkAndRequestPermissions()
-//        playlists.add(Playlist(id = 1, title = "Favorites", songs = mutableListOf()))
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.nav_bottom)
 
@@ -107,17 +105,6 @@ class MainActivity : AppCompatActivity() {
             transaction.commit()
         }
     }
-
-
-//    private fun stopMediaPlayer() {
-//        mediaPlayer?.apply {
-//            if (isPlaying) {
-//                stop()
-//                release()
-//            }
-//        }
-//        mediaPlayer = null
-//    }
 
 
     private fun checkAndRequestPermissions() {

@@ -50,6 +50,7 @@ object SongUtils {
                             id
                         ).toString()
 
+
                         val song = Song(id, title, artist, songUri, "content://media/external/audio/albumart/$albumId", duration)
                         songList.add(song)
 
