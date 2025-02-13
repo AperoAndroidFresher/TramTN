@@ -17,6 +17,7 @@ import com.example.musicapp.base.listeners.OnSongClickListener
 import com.example.musicapp.models.Song
 import com.example.musicapp.utils.SongUtils.getSongsFromDevice
 import androidx.fragment.app.setFragmentResultListener
+import com.example.musicapp.ui.player.PlayerFragment
 
 class SongListFragment : Fragment(), OnSongClickListener {
 
@@ -38,7 +39,6 @@ class SongListFragment : Fragment(), OnSongClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mediaPlayer = MediaPlayer()
         songList = getSongsFromDevice(requireContext()).toMutableList()
 
         if (songList.isNotEmpty()) {
@@ -77,23 +77,18 @@ class SongListFragment : Fragment(), OnSongClickListener {
     }
 
     override fun onSongClick(song: Song) {
-        playAudio(song)
+        val playerFragment = PlayerFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable("song", song)
+            }
+        }
+
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragContainer, playerFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
-    private fun playAudio(song: Song) {
-        try {
-            mediaPlayer?.reset()
-            mediaPlayer?.apply {
-                setDataSource(requireContext(), Uri.parse(song.songUri))
-                prepare()
-                start()
-                Log.d("MediaPlayer", "Đang chơi: ${song.title} by ${song.artist}")
-                Toast.makeText(requireContext(), "Đang chơi: ${song.title} by ${song.artist}", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            Log.e("MediaPlayer", "Lỗi phát nhạc: ${song.title}", e)
-        }
-    }
 
     private fun updatePlaylist(sortedSongs: List<Song>) {
         songList.clear()

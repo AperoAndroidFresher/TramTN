@@ -3,6 +3,7 @@ package com.example.musicapp.ui.Song
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,8 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.example.musicapp.R
 import com.example.musicapp.ui.main.MainActivity
 import com.example.musicapp.databinding.ItemSongBinding
@@ -63,7 +66,7 @@ class SongAdapter(
             setImage(binding, song)
 
             binding.root.setOnClickListener {
-                Toast.makeText(binding.root.context, "Playing: ${song.title} by ${song.artist}", Toast.LENGTH_SHORT).show()
+                Log.d("SongAdapter", "Click vào bài hát: ${song.title}")
                 listener.onSongClick(song)
             }
 
@@ -81,7 +84,7 @@ class SongAdapter(
             setImage(binding, song)
 
             binding.root.setOnClickListener {
-                Toast.makeText(binding.root.context, "Playing: ${song.title} by ${song.artist}", Toast.LENGTH_SHORT).show()
+                Log.d("SongAdapter", "Click vào bài hát: ${song.title}")
                 listener.onSongClick(song)
             }
 
@@ -162,7 +165,6 @@ class SongAdapter(
     private fun showPlaylistDialog(context: Context, song: Song) {
         if (context is MainActivity) {
             val playlists = context.getPlaylists()
-
             val playlistDialog = PlaylistDialogFragment.newInstance(song)
             playlistDialog.show(context.supportFragmentManager, "PlaylistDialogFragment")
         }
