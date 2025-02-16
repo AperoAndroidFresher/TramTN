@@ -7,7 +7,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
-import com.example.musicapp.models.Song
+import com.example.musicapp.data.local.entity.Song
 
 object SongUtils {
     fun getSongsFromDevice(context: Context): List<Song> {
@@ -62,22 +62,5 @@ object SongUtils {
         }
 
         return songList
-    }
-
-    private fun getAlbumArt(filePath: String): Bitmap? {
-        val retriever = MediaMetadataRetriever()
-        return try {
-            retriever.setDataSource(filePath)
-            val art = retriever.embeddedPicture
-            retriever.release()
-            if (art != null) {
-                BitmapFactory.decodeByteArray(art, 0, art.size)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
     }
 }

@@ -1,26 +1,21 @@
-package com.example.musicapp.ui.Song
+package com.example.musicapp.ui.song
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.net.Uri
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.bumptech.glide.request.RequestOptions
 import com.example.musicapp.R
-import com.example.musicapp.ui.main.MainActivity
 import com.example.musicapp.databinding.ItemSongBinding
 import com.example.musicapp.databinding.ItemSongGridBinding
 import com.example.musicapp.base.listeners.OnSongClickListener
 import com.example.musicapp.ui.playlist.PlaylistDialogFragment
-import com.example.musicapp.models.Song
+import com.example.musicapp.data.local.entity.Song
 
 class SongAdapter(
     private var songs: MutableList<Song>,
@@ -66,7 +61,6 @@ class SongAdapter(
             setImage(binding, song)
 
             binding.root.setOnClickListener {
-                Log.d("SongAdapter", "Click vào bài hát: ${song.title}")
                 listener.onSongClick(song)
             }
 
@@ -84,14 +78,12 @@ class SongAdapter(
             setImage(binding, song)
 
             binding.root.setOnClickListener {
-                Log.d("SongAdapter", "Click vào bài hát: ${song.title}")
                 listener.onSongClick(song)
             }
 
             binding.btnOption.setOnClickListener { view ->
                 showPopupMenu(view, song, position)
             }
-
         }
     }
 
@@ -108,18 +100,18 @@ class SongAdapter(
             else -> return
         }
 
-            Glide.with(context)
-                .load(song.albumArt)
-                .error(R.drawable.img_default_music_art)
-                .placeholder(R.drawable.img_default_music_art)
-                .into(imageView)
-
+        Glide.with(context)
+            .load(song.albumArt)
+            .error(R.drawable.img_default_music_art)
+            .placeholder(R.drawable.img_default_music_art)
+            .into(imageView)
     }
 
     private fun showPopupMenu(view: View, song: Song, position: Int) {
         val popupMenu = PopupMenu(view.context, view)
         popupMenu.menuInflater.inflate(R.menu.menu_playlist_options, popupMenu.menu)
 
+        // Buộc biểu tượng hiển thị trong PopupMenu
         try {
             val fields = popupMenu.javaClass.getDeclaredField("mPopup")
             fields.isAccessible = true
@@ -127,14 +119,11 @@ class SongAdapter(
             val classPopupMenu = Class.forName(menuHelper.javaClass.name)
             val setForceIcons = classPopupMenu.getDeclaredMethod("setForceShowIcon", Boolean::class.java)
             setForceIcons.invoke(menuHelper, true)
-
-            val contextWrapper = ContextThemeWrapper(view.context, R.style.CustomPopupMenu)
-            val popupMenu = PopupMenu(contextWrapper, view)
-            popupMenu.menuInflater.inflate(R.menu.menu_playlist_options, popupMenu.menu)
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        // Ẩn/hiển thị các mục menu theo layout
         if (isGridLayout) {
             popupMenu.menu.findItem(R.id.menu_add).isVisible = false
             popupMenu.menu.findItem(R.id.menu_share).isVisible = false
@@ -142,10 +131,12 @@ class SongAdapter(
             popupMenu.menu.findItem(R.id.menu_rename).isVisible = false
             popupMenu.menu.findItem(R.id.menu_remove).isVisible = false
         }
+
+        // Xử lý các sự kiện trên menu
         popupMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_rename -> {
-//                    showRenameDialog(view.context, song, position)
+                    // Chưa triển khai showRenameDialog
                     true
                 }
                 R.id.menu_remove -> {
@@ -153,23 +144,26 @@ class SongAdapter(
                     true
                 }
                 R.id.menu_add -> {
-                    showPlaylistDialog(view.context, song)
+                    openPlaylistDialog(view.context, song)
                     true
                 }
-                R.id.menu_share -> true
+                R.id.menu_share -> {
+                    // Triển khai chia sẻ nếu cần
+                    true
+                }
                 else -> false
             }
         }
         popupMenu.show()
     }
-    private fun showPlaylistDialog(context: Context, song: Song) {
-        if (context is MainActivity) {
-            val playlists = context.getPlaylists()
-            val playlistDialog = PlaylistDialogFragment.newInstance(song)
-            playlistDialog.show(context.supportFragmentManager, "PlaylistDialogFragment")
+
+    private fun openPlaylistDialog(context: Context, song: Song) {
+        val activity = context as? AppCompatActivity
+        activity?.let {
+            val playlistDialogFragment = PlaylistDialogFragment.newInstance(song)
+            playlistDialogFragment.show(it.supportFragmentManager, "PlaylistDialogFragment")
         }
     }
-
 
     @SuppressLint("DefaultLocale")
     private fun formatDuration(duration: Long): String {
@@ -178,10 +172,8 @@ class SongAdapter(
         return String.format("%02d:%02d", minutes, seconds)
     }
 
-
     private fun removeSong(position: Int) {
         songs.removeAt(position)
         notifyItemRemoved(position)
-        notifyItemRangeChanged(position, songs.size)
     }
 }

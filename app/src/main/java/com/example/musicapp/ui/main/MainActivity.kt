@@ -2,7 +2,6 @@ package com.example.musicapp.ui.main
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -18,12 +17,11 @@ import com.example.musicapp.ui.playlist.PlaylistDialogFragment
 import com.example.musicapp.ui.home.HomeFragment
 import com.example.musicapp.ui.library.LibraryFragment
 import com.example.musicapp.ui.playlist.PlaylistFragment
-import com.example.musicapp.models.Playlist
-import com.example.musicapp.models.Song
+import com.example.musicapp.data.local.entity.Playlist
+import com.example.musicapp.data.local.entity.Song
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
-    private val playlists = mutableListOf<Playlist>()
 
     companion object {
         const val REQUEST_CODE_STORAGE_PERMISSION = 1001
@@ -49,7 +47,6 @@ class MainActivity : AppCompatActivity() {
 
             when (menuItem.itemId) {
                 R.id.navPlaylist -> {
-//                    stopMediaPlayer()
                     replaceFragment(PlaylistFragment(), true)
                     true
                 }
@@ -67,7 +64,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (supportFragmentManager.backStackEntryCount > 0) {
@@ -77,20 +73,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-    }
-    fun getPlaylists(): List<Playlist> {
-        return playlists
-    }
-    fun addPlaylist(name: String, song: Song) {
-        val newId = (playlists.maxOfOrNull { it.id } ?: 0) + 1
-        val newPlaylist = Playlist(newId, name, mutableListOf())
-        playlists.add(newPlaylist)
-
-        val fragment = supportFragmentManager.findFragmentByTag("PlaylistFragment") as? PlaylistFragment
-        fragment?.updatePlaylists(playlists)
-
-        val playlistDialog = PlaylistDialogFragment.newInstance(song)
-        playlistDialog.show(supportFragmentManager, "PlaylistDialogFragment")
     }
 
     private fun replaceFragment(fragment: Fragment, addToBackStack: Boolean) {
@@ -105,8 +87,6 @@ class MainActivity : AppCompatActivity() {
             transaction.commit()
         }
     }
-
-
     private fun checkAndRequestPermissions() {
         val permissions = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> arrayOf(

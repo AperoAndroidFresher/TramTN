@@ -3,7 +3,7 @@ package com.example.musicapp.ui.playlist.dialogs
 import android.app.AlertDialog
 import android.content.Context
 import android.widget.EditText
-import com.example.musicapp.models.Playlist
+import com.example.musicapp.data.local.entity.Playlist
 
 
 fun showRenameDialog(context: Context, playlist: Playlist, onRenameConfirmed: (String) -> Unit) {

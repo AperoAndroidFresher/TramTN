@@ -21,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/sampleText"
+            android:id="@+id/txtPlaylistName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -45,7 +45,7 @@
             android:contentDescription=""
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/sampleText"
+            app:layout_constraintStart_toEndOf="@+id/txtPlaylistName"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
@@ -58,7 +58,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.868"
-            app:layout_constraintStart_toEndOf="@+id/sampleText"
+            app:layout_constraintStart_toEndOf="@+id/txtPlaylistName"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.7" />
     </androidx.constraintlayout.widget.ConstraintLayout>

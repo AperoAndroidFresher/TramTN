@@ -19,12 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicApp"
         tools:targetApi="31">
-        <activity
-            android:name=".ui.player.PlayerActivity"
-            android:exported="false" />
 
         <receiver
-            android:name=".ui.Song.receivers.AudioFileReceiver"
+            android:name=".ui.song.receivers.AudioFileReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_SCANNER_FINISHED" />
@@ -32,7 +29,7 @@
         </receiver>
 
         <activity
-            android:name=".ui.main.MainActivity"
+            android:name=".ui.login.LoginActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MusicApp">
@@ -45,9 +42,9 @@
         <activity
             android:name=".ui.signup.SignUpActivity"
             android:exported="true" />
-<!--        <activity-->
-<!--            android:name=".ui.main.MainActivity"-->
-<!--            android:exported="true" />-->
+        <activity
+            android:name=".ui.main.MainActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

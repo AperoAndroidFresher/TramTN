@@ -38,7 +38,7 @@
                 android:padding="20dp"/>
 
             <ImageButton
-                android:id="@+id/btnAddPlaylist"
+                android:id="@+id/btnAdd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_no_playlist_add"

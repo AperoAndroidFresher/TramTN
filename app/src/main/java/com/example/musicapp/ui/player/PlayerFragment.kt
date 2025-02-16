@@ -12,7 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.musicapp.R
 import com.example.musicapp.databinding.FragmentPlayerBinding
-import com.example.musicapp.models.Song
+import com.example.musicapp.data.local.entity.Song
 
 class PlayerFragment : Fragment() {
 
