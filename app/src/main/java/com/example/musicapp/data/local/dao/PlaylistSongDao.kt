@@ -42,5 +42,6 @@ interface PlaylistSongDao {
 
     @Update
     suspend fun updatePlaylistSongs(songs: List<PlaylistSong>)
+
 }
 

@@ -20,13 +20,16 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
     fun syncMusic(context: Context) {
         viewModelScope.launch {
             val deviceSongs = SongUtils.getSongsFromDevice(context)
-            val dbSongs = allSongs.value.toSet()
+            val dbSongs = allSongs.value
 
-            val newSongs = deviceSongs.filter { it !in dbSongs }
+            val newSongs = deviceSongs.filter { deviceSong ->
+                dbSongs.none { dbSong -> dbSong.songId == deviceSong.songId }
+            }
 
             if (newSongs.isNotEmpty()) {
                 repository.insertSongs(newSongs)
             }
         }
     }
+
 }

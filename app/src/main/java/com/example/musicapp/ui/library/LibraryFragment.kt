@@ -1,6 +1,5 @@
 package com.example.musicapp.ui.library
 
-import android.content.Context
 import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -18,9 +17,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.musicapp.base.listeners.OnSongClickListener
 import com.example.musicapp.data.local.database.AppDatabase
+import com.example.musicapp.data.local.repository.PlaylistRepository
 import com.example.musicapp.data.local.repository.SongRepository
-import com.example.musicapp.data.remote.ApiClient
+import com.example.musicapp.data.remote.library.ApiClient
 import com.example.musicapp.ui.player.PlayerFragment
+import com.example.musicapp.ui.playlist.PlaylistViewModel
+import com.example.musicapp.ui.playlist.PlaylistViewModelFactory
 import com.example.musicapp.ui.song.SongViewModel
 import com.example.musicapp.ui.song.SongViewModelFactory
 import kotlinx.coroutines.Dispatchers
@@ -43,9 +45,18 @@ class LibraryFragment : Fragment() {
         val repository by lazy { SongRepository(songDao) }
         SongViewModelFactory(repository)
     }
+    private val playlistViewModel: PlaylistViewModel by viewModels {
+        PlaylistViewModelFactory(
+            PlaylistRepository(
+                AppDatabase.getDatabase(requireContext()).playlistDao(),
+                AppDatabase.getDatabase(requireContext()).playlistSongDao()
+            )
+        )
+    }
 
 
-    override fun onCreateView(
+
+        override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
@@ -157,7 +168,7 @@ class LibraryFragment : Fragment() {
             override fun onSongClick(song: Song) {
                 openPlayerFragment(song)
             }
-        }, isGridLayout = false)
+        }, isGridLayout = false,isInPlaylistFragment = false, viewModel = playlistViewModel)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.adapter = songAdapter

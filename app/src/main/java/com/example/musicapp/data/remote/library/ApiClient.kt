@@ -1,4 +1,4 @@
-package com.example.musicapp.data.remote
+package com.example.musicapp.data.remote.library
 
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient

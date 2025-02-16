@@ -22,6 +22,7 @@ class LoginActivity : BaseActivity() {
     private lateinit var loginButton: Button
     private lateinit var signupText: TextView
     private lateinit var changeLanguageButton: Button
+    private lateinit var rememberMeCheckBox: CheckBox
 
     private val loginViewModel: LoginViewModel by viewModels {
         object : ViewModelProvider.Factory {
@@ -47,13 +48,16 @@ class LoginActivity : BaseActivity() {
         passwordError = findViewById(R.id.txtPasswordError)
         loginButton = findViewById(R.id.btnLogin)
         signupText = findViewById(R.id.txtSignup)
+        rememberMeCheckBox = findViewById(R.id.chkRememberMe)
+
+        // Load username nếu đã được lưu trước đó
+        loadRememberedUser()
 
         loginButton.setOnClickListener {
             val username = usernameField.text.toString().trim()
             val password = passwordField.text.toString().trim()
 
             var isValid = true
-
             usernameError.visibility = View.GONE
             passwordError.visibility = View.GONE
 
@@ -72,12 +76,7 @@ class LoginActivity : BaseActivity() {
             if (isValid) {
                 loginViewModel.login(username, password) { success, userId ->
                     if (success && userId != null) {
-                        val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
-                        val editor = sharedPref.edit()
-                        editor.putString("username", username)
-                        editor.putInt("userId", userId)
-                        editor.apply()
-
+                        saveUserSession(username, userId, rememberMeCheckBox.isChecked)
                         Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
 
                         val intent = Intent(this, MainActivity::class.java)
@@ -97,6 +96,33 @@ class LoginActivity : BaseActivity() {
         }
     }
 
+    private fun saveUserSession(username: String, userId: Int, rememberMe: Boolean) {
+        val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
+        val editor = sharedPref.edit()
+
+        editor.putString("username", username)
+        editor.putInt("userId", userId)
+
+        if (rememberMe) {
+            editor.putBoolean("rememberMe", true)
+        } else {
+            editor.remove("rememberMe")
+        }
+
+        editor.apply()
+    }
+
+    private fun loadRememberedUser() {
+        val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
+        val savedUsername = sharedPref.getString("username", "")
+        val rememberMe = sharedPref.getBoolean("rememberMe", false)
+
+        if (rememberMe) {
+            usernameField.setText(savedUsername)
+            rememberMeCheckBox.isChecked = true
+        }
+    }
+
     private fun showLanguageSelectionDialog() {
         val languages = arrayOf("English", "Tiếng Việt", "Russia")
         val languageCodes = arrayOf("en", "vi", "ru")
@@ -111,4 +137,5 @@ class LoginActivity : BaseActivity() {
         builder.show()
     }
 }
+
 

@@ -2,26 +2,38 @@ package com.example.musicapp.ui.song
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.musicapp.R
 import com.example.musicapp.databinding.ItemSongBinding
 import com.example.musicapp.databinding.ItemSongGridBinding
 import com.example.musicapp.base.listeners.OnSongClickListener
+import com.example.musicapp.data.local.database.AppDatabase
 import com.example.musicapp.ui.playlist.PlaylistDialogFragment
 import com.example.musicapp.data.local.entity.Song
+import com.example.musicapp.data.local.repository.PlaylistRepository
+import com.example.musicapp.ui.playlist.PlaylistViewModel
+import com.example.musicapp.ui.playlist.PlaylistViewModelFactory
 
 class SongAdapter(
     private var songs: MutableList<Song>,
     private val listener: OnSongClickListener,
-    private var isGridLayout: Boolean
+    private var isGridLayout: Boolean,
+    private val isInPlaylistFragment: Boolean,
+    private val viewModel: PlaylistViewModel
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
 
     fun setLayoutType(isGrid: Boolean) {
         isGridLayout = isGrid
@@ -109,9 +121,14 @@ class SongAdapter(
 
     private fun showPopupMenu(view: View, song: Song, position: Int) {
         val popupMenu = PopupMenu(view.context, view)
-        popupMenu.menuInflater.inflate(R.menu.menu_playlist_options, popupMenu.menu)
 
-        // Buộc biểu tượng hiển thị trong PopupMenu
+        val menuRes = if (isInPlaylistFragment) {
+            R.menu.menu_playlist_song_options
+        } else {
+            R.menu.menu_library_song_options
+        }
+        popupMenu.menuInflater.inflate(menuRes, popupMenu.menu)
+
         try {
             val fields = popupMenu.javaClass.getDeclaredField("mPopup")
             fields.isAccessible = true
@@ -123,24 +140,11 @@ class SongAdapter(
             e.printStackTrace()
         }
 
-        // Ẩn/hiển thị các mục menu theo layout
-        if (isGridLayout) {
-            popupMenu.menu.findItem(R.id.menu_add).isVisible = false
-            popupMenu.menu.findItem(R.id.menu_share).isVisible = false
-        } else {
-            popupMenu.menu.findItem(R.id.menu_rename).isVisible = false
-            popupMenu.menu.findItem(R.id.menu_remove).isVisible = false
-        }
-
-        // Xử lý các sự kiện trên menu
         popupMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.menu_rename -> {
-                    // Chưa triển khai showRenameDialog
-                    true
-                }
-                R.id.menu_remove -> {
-                    removeSong(position)
+                R.id.menu_remove_song -> {
+                    val playlistId = 1
+                    viewModel.removeSongFromPlaylist(playlistId, song.songId)
                     true
                 }
                 R.id.menu_add -> {
@@ -148,7 +152,7 @@ class SongAdapter(
                     true
                 }
                 R.id.menu_share -> {
-                    // Triển khai chia sẻ nếu cần
+                    shareSong(view.context, song)
                     true
                 }
                 else -> false
@@ -156,6 +160,23 @@ class SongAdapter(
         }
         popupMenu.show()
     }
+    private fun shareSong(context: Context, song: Song) {
+
+        val songUri = Uri.parse(song.songUri)
+
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_STREAM, songUri)
+            type = "audio/*"
+        }
+
+        if (shareIntent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(Intent.createChooser(shareIntent, "Share song"))
+        } else {
+            Toast.makeText(context, "No sharing apps available", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     private fun openPlaylistDialog(context: Context, song: Song) {
         val activity = context as? AppCompatActivity
@@ -172,8 +193,4 @@ class SongAdapter(
         return String.format("%02d:%02d", minutes, seconds)
     }
 
-    private fun removeSong(position: Int) {
-        songs.removeAt(position)
-        notifyItemRemoved(position)
-    }
 }
