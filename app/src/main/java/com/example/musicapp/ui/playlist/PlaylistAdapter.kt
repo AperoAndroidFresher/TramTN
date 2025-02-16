@@ -6,12 +6,19 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicapp.R
-import com.example.musicapp.models.Playlist
+import com.example.musicapp.data.local.entity.Playlist
+
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class PlaylistAdapter(
     private val playlists: MutableList<Playlist>,
+    private val viewModel: PlaylistViewModel,
+    private val lifecycleOwner: LifecycleOwner,
     private val onRename: (Playlist) -> Unit,
     private val onRemove: (Playlist) -> Unit,
     private val onPlaylistClick: (Playlist) -> Unit
@@ -40,7 +47,10 @@ class PlaylistAdapter(
 
         fun bind(playlist: Playlist) {
             title.text = playlist.title
-            songCount.text = "${playlist.songs.size} songs"
+
+            viewModel.getSongCountLiveData(playlist.playlistId).observe(lifecycleOwner) { count ->
+                songCount.text = "$count songs"
+            }
         }
 
         private fun showPopupMenu(view: View, playlist: Playlist, position: Int) {
@@ -76,12 +86,6 @@ class PlaylistAdapter(
 
     override fun getItemCount(): Int = playlists.size
 
-    fun updatePlaylists(newPlaylists: List<Playlist>) {
-        playlists.clear()
-        playlists.addAll(newPlaylists)
-        notifyDataSetChanged()
-    }
-
     private fun removePlaylist(position: Int) {
         if (position in playlists.indices) {
             playlists.removeAt(position)
@@ -90,3 +94,5 @@ class PlaylistAdapter(
         }
     }
 }
+
+

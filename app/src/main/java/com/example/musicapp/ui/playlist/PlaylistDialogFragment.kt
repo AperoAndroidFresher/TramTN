@@ -1,6 +1,5 @@
 package com.example.musicapp.ui.playlist
 
-import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -11,11 +10,14 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.musicapp.ui.main.MainActivity
+import com.example.musicapp.data.local.database.AppDatabase
 import com.example.musicapp.databinding.FragmentPlaylistDialogBinding
-import com.example.musicapp.models.Playlist
-import com.example.musicapp.models.Song
+import com.example.musicapp.data.local.entity.Playlist
+import com.example.musicapp.data.local.entity.Song
+import com.example.musicapp.data.local.repository.PlaylistRepository
+import com.example.musicapp.ui.playlist.dialogs.CreatePlaylistDialog
 
 class PlaylistDialogFragment : DialogFragment() {
 
@@ -24,10 +26,18 @@ class PlaylistDialogFragment : DialogFragment() {
 
     private lateinit var playlistAdapter: PlaylistAdapter
     private val playlists = mutableListOf<Playlist>()
-
-
     private var song: Song? = null
     private var listener: OnPlaylistSelectedListener? = null
+
+    private val viewModel: PlaylistViewModel by viewModels {
+        PlaylistViewModelFactory(
+            PlaylistRepository(
+                AppDatabase.getDatabase(requireContext()).playlistDao(),
+                AppDatabase.getDatabase(requireContext()).playlistSongDao()
+            )
+        )
+    }
+
 
     interface OnPlaylistSelectedListener {
         fun onPlaylistSelected(song: Song, playlist: Playlist)
@@ -35,10 +45,10 @@ class PlaylistDialogFragment : DialogFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (parentFragment is OnPlaylistSelectedListener) {
-            listener = parentFragment as OnPlaylistSelectedListener
-        } else if (context is OnPlaylistSelectedListener) {
-            listener = context
+        listener = when {
+            parentFragment is OnPlaylistSelectedListener -> parentFragment as OnPlaylistSelectedListener
+            context is OnPlaylistSelectedListener -> context
+            else -> null
         }
     }
 
@@ -53,122 +63,107 @@ class PlaylistDialogFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         song = arguments?.getParcelable("song")
-
-        if (requireActivity() is MainActivity) {
-            playlists.clear()
-            playlists.addAll((requireActivity() as MainActivity).getPlaylists())
-        }
+        val userId = getUserId()
 
         setupRecyclerView()
-        updateUI()
+        observePlaylists()
 
-        binding.btnAddPlaylist.setOnClickListener {
-            song?.let {
-                showAddPlaylistDialog(requireContext(), it)
-            }
+        if (userId != -1) {
+            viewModel.loadPlaylists(userId)
         }
 
-
+        binding.btnAdd.setOnClickListener { showCreatePlaylistDialog(userId) }
     }
-    private fun showAddPlaylistDialog(context: Context, song: Song) {
-        val input = EditText(context)
-        input.hint = "Enter playlist name"
-
-        val dialog = AlertDialog.Builder(context)
-            .setTitle("Create New Playlist")
-            .setView(input)
-            .setPositiveButton("Create") { _, _ ->
-                val playlistName = input.text.toString().trim()
-                if (playlistName.isNotEmpty()) {
-                    if (context is MainActivity) {
-                        context.addPlaylist(playlistName, song)
-
-                        playlists.clear()
-                        playlists.addAll(context.getPlaylists())
-                        playlistAdapter.notifyDataSetChanged()
-                        updateUI()
-                    }
-                } else {
-                    Toast.makeText(context, "Name cannot be empty!", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .create()
-        dialog.show()
-    }
-
-
 
     private fun setupRecyclerView() {
         playlistAdapter = PlaylistAdapter(
             playlists,
-            onRename = { playlist -> showRenameDialog(playlist) },
-            onRemove = { playlist ->
-                playlists.remove(playlist)
-                playlistAdapter.updatePlaylists(playlists)
-                updateUI()
-            },
-            onPlaylistClick = { playlist ->
-                song?.let {
-                    playlist.songs.add(it)
-                    Toast.makeText(context, "Add song to '${playlist.title}'", Toast.LENGTH_SHORT).show()
-                    listener?.onPlaylistSelected(it, playlist)
-                    dismiss()
-                }
-            }
-
+            viewModel,
+            viewLifecycleOwner,
+            onRename = { showRenameDialog(it) },
+            onRemove = { deletePlaylist(it) },
+            onPlaylistClick = { addSongToPlaylist(it) }
         )
         binding.recyclerViewPlaylists.layoutManager = LinearLayoutManager(context)
         binding.recyclerViewPlaylists.adapter = playlistAdapter
     }
 
-    private fun updateUI() {
-        if (playlists.isEmpty()) {
-            binding.viewFlipper.displayedChild = 0
-        } else {
-            binding.viewFlipper.displayedChild = 1
+    private fun observePlaylists() {
+        viewModel.playlists.observe(viewLifecycleOwner) { newPlaylists ->
+            playlists.clear()
+            playlists.addAll(newPlaylists)
+            playlistAdapter.notifyDataSetChanged()
+            updateUI()
         }
+    }
+
+    private fun updateUI() {
+        binding.viewFlipper.displayedChild = if (playlists.isEmpty()) 0 else 1
+    }
+
+    private fun showCreatePlaylistDialog(userId: Int) {
+        if (userId == -1) return
+        CreatePlaylistDialog(userId) { newPlaylist ->
+            viewModel.addPlaylist(newPlaylist)
+        }.show(parentFragmentManager, "CreatePlaylistDialog")
     }
 
     private fun showRenameDialog(playlist: Playlist) {
         val context = requireContext()
-        val builder = androidx.appcompat.app.AlertDialog.Builder(context)
-        builder.setTitle("Rename Playlist")
+        val input = EditText(context).apply { setText(playlist.title) }
 
-        val input = android.widget.EditText(context)
-        input.setText(playlist.title)
-        builder.setView(input)
-
-        builder.setPositiveButton("OK") { _, _ ->
-            val newTitle = input.text.toString().trim()
-            if (newTitle.isNotEmpty()) {
-                playlist.title = newTitle
-                playlistAdapter.updatePlaylists(playlists)
+        androidx.appcompat.app.AlertDialog.Builder(context)
+            .setTitle("Rename Playlist")
+            .setView(input)
+            .setPositiveButton("OK") { _, _ ->
+                val newTitle = input.text.toString().trim()
+                if (newTitle.isNotEmpty()) {
+                    viewModel.updatePlaylistTitle(playlist.playlistId, newTitle, getUserId())
+                }
             }
-        }
-
-        builder.setNegativeButton("Cancel", null)
-        builder.show()
+            .setNegativeButton("Cancel", null)
+            .show()
     }
+
+    private fun deletePlaylist(playlist: Playlist) {
+        viewModel.deletePlaylist(playlist.playlistId, getUserId())
+    }
+
+    private fun getUserId(): Int {
+        val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+        return sharedPref.getInt("userId", 0)
+    }
+
+    private fun addSongToPlaylist(playlist: Playlist) {
+        song?.let { song ->
+            viewModel.addSongToPlaylist(playlist.playlistId, song.songId)
+
+            Toast.makeText(context, "Added to '${playlist.title}'", Toast.LENGTH_SHORT).show()
+            listener?.onPlaylistSelected(song, playlist)
+            dismiss()
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
     override fun onStart() {
         super.onStart()
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog?.window?.setLayout((resources.displayMetrics.widthPixels * 0.7).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog?.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.7).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
-
 
     companion object {
         fun newInstance(song: Song): PlaylistDialogFragment {
-            val fragment = PlaylistDialogFragment()
-            val args = Bundle()
-            args.putParcelable("song", song)
-            fragment.arguments = args
-            return fragment
+            return PlaylistDialogFragment().apply {
+                arguments = Bundle().apply { putParcelable("song", song) }
+            }
         }
     }
 }

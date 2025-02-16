@@ -4,58 +4,58 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.*
-import android.widget.Button
-import android.widget.EditText
 import androidx.fragment.app.DialogFragment
-import com.example.musicapp.R
-import com.example.musicapp.models.Playlist
+import com.example.musicapp.databinding.DialogCreatePlaylistBinding
+import com.example.musicapp.data.local.entity.Playlist
 
 class CreatePlaylistDialog(
+    private val userId: Int,
     private val initialTitle: String? = null,
     private val onCreate: (Playlist) -> Unit
 ) : DialogFragment() {
 
-    private lateinit var editTextTitle: EditText
-    private lateinit var btnCancel: Button
-    private lateinit var btnCreate: Button
+    private var _binding: DialogCreatePlaylistBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.dialog_create_playlist, container, false)
+        _binding = DialogCreatePlaylistBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        editTextTitle = view.findViewById(R.id.etPlayList)
-        btnCancel = view.findViewById(R.id.btnCancel)
-        btnCreate = view.findViewById(R.id.btnCreate)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        editTextTitle.setText(initialTitle)
+        binding.etPlayList.setText(initialTitle)
 
-        btnCancel.setOnClickListener {
+        binding.btnCancel.setOnClickListener {
             dismiss()
         }
 
-        btnCreate.setOnClickListener {
-            val title = editTextTitle.text.toString().trim()
+        binding.btnCreate.setOnClickListener {
+            val title = binding.etPlayList.text.toString().trim()
             if (title.isNotEmpty()) {
                 val newPlaylist = Playlist(
-                    id = System.currentTimeMillis().toInt(),
-                    title = title,
-                    songs = mutableListOf()
+                    userId = userId,
+                    title = title
                 )
                 onCreate(newPlaylist)
                 dismiss()
             }
         }
-
-        return view
     }
 
     override fun onStart() {
-            super.onStart()
-            dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            dialog?.window?.setLayout((resources.displayMetrics.widthPixels * 0.7).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
-        }
+        super.onStart()
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setLayout((resources.displayMetrics.widthPixels * 0.7).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

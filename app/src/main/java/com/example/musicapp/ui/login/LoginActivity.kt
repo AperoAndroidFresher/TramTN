@@ -11,7 +11,7 @@ import com.example.musicapp.R
 import com.example.musicapp.ui.main.MainActivity
 import com.example.musicapp.ui.signup.SignUpActivity
 import com.example.musicapp.base.BaseActivity
-import com.example.musicapp.data.local.database.UserDatabase
+import com.example.musicapp.data.local.database.AppDatabase
 
 class LoginActivity : BaseActivity() {
 
@@ -26,19 +26,16 @@ class LoginActivity : BaseActivity() {
     private val loginViewModel: LoginViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val userDao = UserDatabase.getDatabase(applicationContext).userDao()
+                val userDao = AppDatabase.getDatabase(applicationContext).userDao()
                 return LoginViewModel(userDao) as T
             }
         }
     }
 
-    private val userList = hashMapOf(
-        "tram" to "Tram123"
-    )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
         changeLanguageButton = findViewById(R.id.btnChangeLanguage)
         changeLanguageButton.setOnClickListener {
             showLanguageSelectionDialog()
@@ -71,14 +68,22 @@ class LoginActivity : BaseActivity() {
                 passwordError.visibility = View.VISIBLE
                 isValid = false
             }
+
             if (isValid) {
-                loginViewModel.login(username, password) { success ->
-                    if (success) {
+                loginViewModel.login(username, password) { success, userId ->
+                    if (success && userId != null) {
+                        val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
+                        val editor = sharedPref.edit()
+                        editor.putString("username", username)
+                        editor.putInt("userId", userId)
+                        editor.apply()
+
                         Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+
                         val intent = Intent(this, MainActivity::class.java)
                         startActivity(intent)
                         finish()
-                    }else{
+                    } else {
                         passwordError.text = "Invalid username or password"
                         passwordError.visibility = View.VISIBLE
                     }
@@ -91,6 +96,7 @@ class LoginActivity : BaseActivity() {
             startActivity(intent)
         }
     }
+
     private fun showLanguageSelectionDialog() {
         val languages = arrayOf("English", "Tiếng Việt", "Russia")
         val languageCodes = arrayOf("en", "vi", "ru")
@@ -104,6 +110,5 @@ class LoginActivity : BaseActivity() {
         }
         builder.show()
     }
-
-
 }
+

@@ -1,30 +1,28 @@
 package com.example.musicapp.ui.library
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.media.MediaPlayer
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.musicapp.R
-import com.example.musicapp.ui.Song.SongAdapter
+import com.example.musicapp.ui.song.SongAdapter
 import com.example.musicapp.databinding.FragmentLibraryBinding
-import com.example.musicapp.models.Song
-import com.example.musicapp.utils.SongUtils
+import com.example.musicapp.data.local.entity.Song
 import android.util.Log
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.musicapp.base.listeners.OnSongClickListener
+import com.example.musicapp.data.local.database.AppDatabase
+import com.example.musicapp.data.local.repository.SongRepository
 import com.example.musicapp.data.remote.ApiClient
 import com.example.musicapp.ui.player.PlayerFragment
+import com.example.musicapp.ui.song.SongViewModel
+import com.example.musicapp.ui.song.SongViewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,6 +38,13 @@ class LibraryFragment : Fragment() {
 
     private var mediaPlayer: MediaPlayer? = null
 
+    private val songViewModel: SongViewModel by viewModels {
+        val songDao by lazy { AppDatabase.getDatabase(requireContext()).songDao() }
+        val repository by lazy { SongRepository(songDao) }
+        SongViewModelFactory(repository)
+    }
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -52,13 +57,13 @@ class LibraryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
-        loadSongs(requireContext())
+        syncMusic()
 
         binding.btnLocal.setOnClickListener {
             if (!isLocalSelected) {
                 isLocalSelected = true
                 updateTabUI()
-                loadSongs(requireContext())
+                loadSongsFromDB()
             }
         }
 
@@ -74,6 +79,19 @@ class LibraryFragment : Fragment() {
                 binding.recyclerView.visibility = View.VISIBLE
                 binding.layoutError.visibility = View.GONE
                 Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show()
+        }
+    }
+    private fun syncMusic() {
+        songViewModel.syncMusic(requireContext())
+        loadSongsFromDB()
+    }
+    private fun loadSongsFromDB() {
+        lifecycleScope.launch {
+            songViewModel.allSongs.collect { songs ->
+                songList.clear()
+                songList.addAll(songs)
+                songAdapter.notifyDataSetChanged()
+            }
         }
     }
     private fun fetchRemoteSongs() {
@@ -93,7 +111,7 @@ class LibraryFragment : Fragment() {
                 songList.clear()
                 songList.addAll(response.map { remote ->
                     Song(
-                        id = UUID.randomUUID().toString(),
+                        songId = UUID.randomUUID().toString(),
                         title = remote.title,
                         artist = remote.artist,
                         songUri = remote.path,
@@ -155,21 +173,6 @@ class LibraryFragment : Fragment() {
             .replace(R.id.fragContainer, playerFragment)
             .addToBackStack(null)
             .commit()
-    }
-
-    private fun loadSongs(context: Context) {
-        songList.clear()
-        val songs = SongUtils.getSongsFromDevice(context)
-
-        Log.d("LibraryFragment", "Số bài hát tìm thấy: ${songs.size}")
-
-        songList.addAll(songs)
-
-        if (::songAdapter.isInitialized) {
-            songAdapter.notifyDataSetChanged()
-        } else {
-            setupRecyclerView()
-        }
     }
 
     override fun onDestroyView() {

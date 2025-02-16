@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.musicapp.R
 import com.example.musicapp.base.BaseActivity
-import com.example.musicapp.data.local.database.UserDatabase
+import com.example.musicapp.data.local.database.AppDatabase
 import com.example.musicapp.ui.login.LoginActivity
 
 
@@ -23,10 +23,10 @@ class SignUpActivity : BaseActivity() {
     private lateinit var passwordErrorText: TextView
     private lateinit var emailErrorText: TextView
     private lateinit var backArrow: ImageView
-    private val signUpViewModel : SignUpViewModel by viewModels(){
-        object : ViewModelProvider.Factory{
+    private val signUpViewModel: SignUpViewModel by viewModels() {
+        object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val userDao = UserDatabase.getDatabase(applicationContext).userDao()
+                val userDao = AppDatabase.getDatabase(applicationContext).userDao()
                 return SignUpViewModel(userDao) as T
             }
         }
@@ -97,14 +97,14 @@ class SignUpActivity : BaseActivity() {
                 emailErrorText.visibility = TextView.VISIBLE
                 isValid = false
             }
-            if (isValid){
-                signUpViewModel.signUp(username,password,email) { success ->
+            if (isValid) {
+                signUpViewModel.signUp(username, password, email) { success ->
                     if (success) {
                         showToast("Sign up successful")
                         val intent = Intent(this, LoginActivity::class.java)
                         startActivity(intent)
                         finish()
-                    }else{
+                    } else {
                         showToast("Sign up failed")
                     }
                 }
