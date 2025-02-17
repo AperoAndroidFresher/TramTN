@@ -6,7 +6,7 @@
     android:background="@color/black">
 
     <ImageView
-        android:id="@+id/imgCover"
+        android:id="@+id/imgArtist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
