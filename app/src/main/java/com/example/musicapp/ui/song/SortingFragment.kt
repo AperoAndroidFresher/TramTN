@@ -62,7 +62,6 @@ class SortingFragment : Fragment() {
             return
         }
 
-        // Set up the RecyclerView with appropriate layout manager
         binding.recyclerView.layoutManager = if (isGridLayout) {
             GridLayoutManager(requireContext(), 2)
         } else {
@@ -86,7 +85,7 @@ class SortingFragment : Fragment() {
             override fun onSongClick(song: Song) {
                 Toast.makeText(requireContext(), "Đã chọn bài hát: ${song.title}", Toast.LENGTH_SHORT).show()
             }
-        }, isGridLayout)
+        }, isGridLayout,isInPlaylistFragment = true,viewModel=viewModel)
 
         binding.recyclerView.adapter = songAdapter
 
@@ -102,11 +101,8 @@ class SortingFragment : Fragment() {
                 val fromPosition = viewHolder.bindingAdapterPosition
                 val toPosition = target.bindingAdapterPosition
 
-                // Swap the songs in the list
                 Collections.swap(songs, fromPosition, toPosition)
                 songAdapter.notifyItemMoved(fromPosition, toPosition)
-
-                // Optionally, update the order of songs in the database if needed
                 updateSongOrderInDatabase()
 
                 return true

@@ -70,5 +70,10 @@ class PlaylistViewModel(private val repository: PlaylistRepository) : ViewModel(
             repository.updatePlaylistSongOrder(songs)
         }
     }
+    fun removeSongFromPlaylist(playlistId: Int, songId: String) {
+        viewModelScope.launch {
+            repository.removeSongFromPlaylist(playlistId, songId)
+        }
+    }
 
 }

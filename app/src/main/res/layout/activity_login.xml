@@ -113,7 +113,8 @@
         android:buttonTint="@color/login_remember_btn_blue_06A0B5"
         app:layout_constraintTop_toBottomOf="@id/txtPasswordError"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        android:checked="true"/>
 
     <Button
         android:id="@+id/btnLogin"

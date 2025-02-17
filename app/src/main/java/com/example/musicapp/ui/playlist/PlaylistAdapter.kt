@@ -56,6 +56,16 @@ class PlaylistAdapter(
         private fun showPopupMenu(view: View, playlist: Playlist, position: Int) {
             val popupMenu = PopupMenu(view.context, view)
             popupMenu.menuInflater.inflate(R.menu.menu_playlist_options, popupMenu.menu)
+            try {
+                val fields = popupMenu.javaClass.getDeclaredField("mPopup")
+                fields.isAccessible = true
+                val menuHelper = fields.get(popupMenu)
+                val classPopupMenu = Class.forName(menuHelper.javaClass.name)
+                val setForceIcons = classPopupMenu.getDeclaredMethod("setForceShowIcon", Boolean::class.java)
+                setForceIcons.invoke(menuHelper, true)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
 
             popupMenu.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
@@ -63,7 +73,7 @@ class PlaylistAdapter(
                         onRename(playlist)
                         true
                     }
-                    R.id.menu_remove -> {
+                    R.id.menu_remove_playlist -> {
                         removePlaylist(position)
                         true
                     }

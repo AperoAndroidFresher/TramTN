@@ -52,6 +52,9 @@ class PlaylistRepository(
             playlistSongDao.getSongsByPlaylistLinear(playlistId)
         }
     }
+    suspend fun removeSongFromPlaylist(playlistId: Int, songId: String) {
+        playlistSongDao.removeSongFromPlaylist(playlistId, songId)
+    }
 
 }
 

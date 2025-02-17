@@ -56,7 +56,7 @@ class SongListFragment : Fragment(), OnSongClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         playlistId = arguments?.getInt("playlistId") ?: -1
-        songAdapter = SongAdapter(songList, this, isGridLayout)
+        songAdapter = SongAdapter(songList, this, isGridLayout,isInPlaylistFragment = true,viewModel=viewModel)
 
         binding.recyclerView.layoutManager = getLayoutManager()
         binding.recyclerView.adapter = songAdapter
@@ -92,7 +92,7 @@ class SongListFragment : Fragment(), OnSongClickListener {
                 if (songList != songs) {
                     songList.clear()
                     songList.addAll(songs)
-                    songAdapter.notifyDataSetChanged() // Thông báo adapter rằng dữ liệu đã thay đổi
+                    songAdapter.notifyDataSetChanged()
                 }
             }
         }
