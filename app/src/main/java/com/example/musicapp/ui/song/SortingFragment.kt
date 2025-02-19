@@ -142,11 +142,9 @@ class SortingFragment : Fragment() {
             )
         }
 
-        // Update the song order in the database
         viewModel.updatePlaylistSongsOrder(sortedPlaylistSongs)
         Toast.makeText(requireContext(), "Sắp xếp thành công", Toast.LENGTH_SHORT).show()
 
-        // Return to the previous fragment
         parentFragmentManager.popBackStack()
     }
 

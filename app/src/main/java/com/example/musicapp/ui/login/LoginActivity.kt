@@ -21,7 +21,6 @@ class LoginActivity : BaseActivity() {
     private lateinit var passwordError: TextView
     private lateinit var loginButton: Button
     private lateinit var signupText: TextView
-    private lateinit var changeLanguageButton: Button
     private lateinit var rememberMeCheckBox: CheckBox
 
     private val loginViewModel: LoginViewModel by viewModels {
@@ -37,11 +36,6 @@ class LoginActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        changeLanguageButton = findViewById(R.id.btnChangeLanguage)
-        changeLanguageButton.setOnClickListener {
-            showLanguageSelectionDialog()
-        }
-
         usernameField = findViewById(R.id.ttUsername)
         passwordField = findViewById(R.id.ttPassword)
         usernameError = findViewById(R.id.txtUsernameError)
@@ -50,7 +44,6 @@ class LoginActivity : BaseActivity() {
         signupText = findViewById(R.id.txtSignup)
         rememberMeCheckBox = findViewById(R.id.chkRememberMe)
 
-        // Load username nếu đã được lưu trước đó
         loadRememberedUser()
 
         loginButton.setOnClickListener {
@@ -74,19 +67,20 @@ class LoginActivity : BaseActivity() {
             }
 
             if (isValid) {
-                loginViewModel.login(username, password) { success, userId ->
-                    if (success && userId != null) {
-                        saveUserSession(username, userId, rememberMeCheckBox.isChecked)
-                        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+                loginViewModel.login(username, password) { success, user ->
+                    if (success && user != null) {
+                        saveUserSession(user.username, user.userId, user.email, user.avatar, rememberMeCheckBox.isChecked)
 
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
+                        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, MainActivity::class.java))
                         finish()
                     } else {
                         passwordError.text = "Invalid username or password"
                         passwordError.visibility = View.VISIBLE
                     }
                 }
+
+
             }
         }
 
@@ -96,12 +90,14 @@ class LoginActivity : BaseActivity() {
         }
     }
 
-    private fun saveUserSession(username: String, userId: Int, rememberMe: Boolean) {
+    private fun saveUserSession(username: String, userId: Int,userEmail : String, avatar: String?, rememberMe: Boolean) {
         val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
-        editor.putString("username", username)
+        editor.putString("username"  , username)
         editor.putInt("userId", userId)
+        editor.putString("email", userEmail)
+        editor.putString("avatar", avatar)
 
         if (rememberMe) {
             editor.putBoolean("rememberMe", true)
@@ -121,20 +117,6 @@ class LoginActivity : BaseActivity() {
             usernameField.setText(savedUsername)
             rememberMeCheckBox.isChecked = true
         }
-    }
-
-    private fun showLanguageSelectionDialog() {
-        val languages = arrayOf("English", "Tiếng Việt", "Russia")
-        val languageCodes = arrayOf("en", "vi", "ru")
-
-        val builder = android.app.AlertDialog.Builder(this)
-        builder.setTitle("Chọn ngôn ngữ")
-        builder.setItems(languages) { _, which ->
-            val selectedLanguageCode = languageCodes[which]
-            setLocale(selectedLanguageCode)
-            recreate()
-        }
-        builder.show()
     }
 }
 

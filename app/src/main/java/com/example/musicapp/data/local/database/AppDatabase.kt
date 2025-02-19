@@ -17,7 +17,7 @@ import com.example.musicapp.data.local.entity.User
     Playlist::class,
     Song::class,
     PlaylistSong::class],
-    version = 5, exportSchema = false)
+    version = 6, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao

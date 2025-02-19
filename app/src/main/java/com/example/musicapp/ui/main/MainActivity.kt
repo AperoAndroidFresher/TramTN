@@ -1,6 +1,7 @@
 package com.example.musicapp.ui.main
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -13,15 +14,17 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.musicapp.R
+import com.example.musicapp.base.BaseActivity
 import com.example.musicapp.ui.playlist.PlaylistDialogFragment
 import com.example.musicapp.ui.home.HomeFragment
 import com.example.musicapp.ui.library.LibraryFragment
 import com.example.musicapp.ui.playlist.PlaylistFragment
 import com.example.musicapp.data.local.entity.Playlist
 import com.example.musicapp.data.local.entity.Song
+import com.example.musicapp.ui.login.LoginActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     companion object {
         const val REQUEST_CODE_STORAGE_PERMISSION = 1001
@@ -30,6 +33,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
+        val username = sharedPref.getString("username", null)
+
+        if (username != null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragContainer, HomeFragment())
+                .commit()
+        } else {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+
 
         checkAndRequestPermissions()
 

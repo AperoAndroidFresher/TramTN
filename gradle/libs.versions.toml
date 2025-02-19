@@ -20,6 +20,7 @@ navigationFragmentKtxVersion = "2.8.5"
 navigationUiKtxVersion = "2.8.5"
 activity = "1.10.0"
 okhttp = "4.11.0"
+picasso = "2.71828"
 recyclerview = "1.4.0"
 retrofitVersion = "2.9.0"
 roomRuntime = "2.6.1"
@@ -48,6 +49,7 @@ navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx",
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
 retrofit2-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
 
 [plugins]
