@@ -3,6 +3,7 @@ package com.example.musicapp.ui.song
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -34,6 +35,11 @@ class SongAdapter(
     private val viewModel: PlaylistViewModel
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    private var selectedSongId: String? = null
+    fun setSelectedSongId(songId: String?) {
+        selectedSongId = songId
+        notifyDataSetChanged()
+    }
 
     fun setLayoutType(isGrid: Boolean) {
         isGridLayout = isGrid
@@ -60,6 +66,15 @@ class SongAdapter(
         when (holder) {
             is GridSongViewHolder -> holder.bind(song, position)
             is LinearSongViewHolder -> holder.bind(song, position)
+        }
+        if (song.songId == selectedSongId) {
+            holder.itemView.setBackgroundColor(
+                holder.itemView.context.getColor(R.color.login_password_field_white)
+            )
+        } else {
+            holder.itemView.setBackgroundColor(
+                holder.itemView.context.getColor(android.R.color.transparent)
+            )
         }
     }
 

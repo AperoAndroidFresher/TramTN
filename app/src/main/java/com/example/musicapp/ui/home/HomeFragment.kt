@@ -83,21 +83,6 @@ class HomeFragment : Fragment() {
             openSeeAllScreen("Top Artists", "ARTIST", fullArtistList)
         }
     }
-    private fun showErrorLayout() {
-        binding.layoutError.visibility = View.VISIBLE
-    }
-
-    private fun hideErrorLayout() {
-        binding.layoutError.visibility = View.GONE
-    }
-
-    private fun showLoading() {
-        binding.progressBar.visibility = View.VISIBLE
-    }
-
-    private fun hideLoading() {
-        binding.progressBar.visibility = View.GONE
-    }
 
     private fun openSettingFragment() {
         val settingFragment = SettingFragment()
