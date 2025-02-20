@@ -1,9 +1,12 @@
 package com.example.musicapp.ui.main
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
@@ -55,11 +58,19 @@ class MainActivity : BaseActivity(), OnSongClickListener {
         }
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(exitReceiver, IntentFilter("com.example.musicapp.ACTION_EXIT"), Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(exitReceiver, IntentFilter("com.example.musicapp.ACTION_EXIT"))
+        }
+
         binding.miniPlayerInclude.ivMiniClose.setOnClickListener {
             musicService?.stopService()
             binding.miniPlayerInclude.miniPlayerLayout.visibility = View.GONE
@@ -137,7 +148,11 @@ class MainActivity : BaseActivity(), OnSongClickListener {
         Log.d("MainActivity", "Ẩn MiniPlayer sau khi dừng Service")
         binding.miniPlayerInclude.miniPlayerLayout.visibility = View.GONE
     }
-
+    private val exitReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            finishAffinity()
+        }
+    }
     private fun replaceFragment(fragment: Fragment, addToBackStack: Boolean) {
         if (!isFinishing && !supportFragmentManager.isStateSaved) {
             val transaction = supportFragmentManager.beginTransaction()
@@ -272,6 +287,7 @@ class MainActivity : BaseActivity(), OnSongClickListener {
             unbindService(connection)
             isBound = false
         }
+        unregisterReceiver(exitReceiver)
     }
 
     override fun onSongClick(song: Song) {

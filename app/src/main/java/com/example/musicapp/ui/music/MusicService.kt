@@ -268,6 +268,8 @@ class MusicService : Service() {
             }
             ACTION_CLOSE -> {
                 stopService()
+                val exitIntent = Intent("com.example.musicapp.ACTION_EXIT")
+                sendBroadcast(exitIntent)
             }
             ACTION_NEXT -> nextSong()
             ACTION_PRE -> preSong()
