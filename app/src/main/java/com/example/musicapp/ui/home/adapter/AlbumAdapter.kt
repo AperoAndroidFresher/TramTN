@@ -1,37 +1,37 @@
 package com.example.musicapp.ui.home.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.musicapp.R
 import com.example.musicapp.data.remote.home.response.Album
+import com.example.musicapp.databinding.ItemAlbumBinding
+import com.squareup.picasso.Picasso
 
-class AlbumAdapter(private var albums: List<Album>) : RecyclerView.Adapter<AlbumAdapter.ViewHolder>() {
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val name: TextView = view.findViewById(R.id.albumTitle)
-        val artist: TextView = view.findViewById(R.id.albumAuthor)
-        val image: ImageView = view.findViewById(R.id.imgAlbum)
+class AlbumAdapter(private val albums: List<Album>) : RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder>() {
+
+    class AlbumViewHolder(val binding: ItemAlbumBinding) : RecyclerView.ViewHolder(binding.root)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumViewHolder {
+        val binding = ItemAlbumBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return AlbumViewHolder(binding)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_album, parent, false)
-        return ViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: AlbumViewHolder, position: Int) {
         val album = albums[position]
-        holder.name.text = album.name
-        holder.artist.text = album.artist
-        Glide.with(holder.image.context).load(album.imageUrl).into(holder.image)
+        val binding = holder.binding
+
+        binding.albumTitle.text = album.name
+        binding.albumAuthor.text = album.artist.name
+
+        val imageUrl = album.image.find { it.size == "medium" }?.url ?: ""
+
+        if (imageUrl.isNotEmpty()) {
+            Picasso.get().load(imageUrl).into(binding.imgAlbum)
+        }else{
+            binding.imgAlbum.setImageResource(R.drawable.img_no_image)
+        }
     }
 
-    override fun getItemCount() = albums.size
-    fun updateData(newData: List<Album>) {
-        this.albums = newData
-        notifyDataSetChanged()
-    }
+    override fun getItemCount(): Int = albums.size
 }

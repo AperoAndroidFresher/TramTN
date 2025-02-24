@@ -12,7 +12,7 @@ class SignUpViewModel(private val userDao: UserDao) : ViewModel() {
 
     fun signUp(username: String, password: String, email: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val user = User(username = username, password = password, email = email)
+            val user = User(username = username, password = password, email = email,avatar = "")
             val userId = userDao.insertUser(user)
             withContext(Dispatchers.Main) {
                 onResult(userId != -1L)

@@ -1,7 +1,12 @@
 package com.example.musicapp.ui.song
 
-import android.media.MediaPlayer
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,24 +21,46 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import com.example.musicapp.ui.player.PlayerFragment
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import com.example.musicapp.data.local.database.AppDatabase
 import com.example.musicapp.data.local.entity.PlaylistSong
 import com.example.musicapp.data.local.repository.PlaylistRepository
+import com.example.musicapp.ui.main.MainActivity
+import com.example.musicapp.ui.music.MusicService
+import com.example.musicapp.ui.music.PlayerFragment
 import com.example.musicapp.ui.playlist.PlaylistViewModel
 import com.example.musicapp.ui.playlist.PlaylistViewModelFactory
 
 class SongListFragment : Fragment(), OnSongClickListener {
 
-    private var mediaPlayer: MediaPlayer? = null
     private var _binding: FragmentSongListBinding? = null
     private val binding get() = _binding!!
+
     private lateinit var songAdapter: SongAdapter
     private var isGridLayout = false
     private var songList: MutableList<Song> = mutableListOf()
     private var playlistId: Int = -1
+
+    private var musicService: MusicService? = null
+    private var isBound = false
+
+    private var selectedSongId: String? = null
+    private var isPlaying: Boolean = false
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as MusicService.MusicBinder
+            musicService = binder.getService()
+            isBound = true
+            observeServiceState()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            musicService = null
+            isBound = false
+        }
+    }
 
     private val viewModel: PlaylistViewModel by viewModels {
         PlaylistViewModelFactory(
@@ -56,7 +83,14 @@ class SongListFragment : Fragment(), OnSongClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         playlistId = arguments?.getInt("playlistId") ?: -1
-        songAdapter = SongAdapter(songList, this, isGridLayout,isInPlaylistFragment = true,viewModel=viewModel)
+
+        songAdapter = SongAdapter(
+            songs = songList,
+            listener = this,
+            isGridLayout = isGridLayout,
+            isInPlaylistFragment = true,
+            viewModel = viewModel
+        )
 
         binding.recyclerView.layoutManager = getLayoutManager()
         binding.recyclerView.adapter = songAdapter
@@ -86,14 +120,31 @@ class SongListFragment : Fragment(), OnSongClickListener {
         }
     }
 
+    // Bind Service
+    override fun onStart() {
+        super.onStart()
+        val intent = Intent(requireContext(), MusicService::class.java)
+        // Đảm bảo service đang chạy foreground
+        requireContext().startService(intent)
+        // Bind service
+        requireContext().bindService(intent, connection, Context.BIND_AUTO_CREATE)
+    }
+
+    // Unbind Service
+    override fun onStop() {
+        super.onStop()
+        if (isBound) {
+            requireContext().unbindService(connection)
+            isBound = false
+        }
+    }
+
     private fun loadSongsFromPlaylist(playlistId: Int) {
         lifecycleScope.launch {
             viewModel.getSongsByPlaylist(playlistId, isGridLayout).collectLatest { songs ->
-                if (songList != songs) {
-                    songList.clear()
-                    songList.addAll(songs)
-                    songAdapter.notifyDataSetChanged()
-                }
+                songList.clear()
+                songList.addAll(songs)
+                songAdapter.notifyDataSetChanged()
             }
         }
     }
@@ -107,6 +158,10 @@ class SongListFragment : Fragment(), OnSongClickListener {
         )
         updateSongOrder()
     }
+
+    private fun getLayoutManager(): RecyclerView.LayoutManager =
+        if (isGridLayout) GridLayoutManager(requireContext(), 2)
+        else LinearLayoutManager(requireContext())
 
     private fun updateSongOrder() {
         val sortedSongs = if (isGridLayout) {
@@ -126,15 +181,9 @@ class SongListFragment : Fragment(), OnSongClickListener {
                 )
             }
         }
-
         viewModel.updatePlaylistSongsOrder(sortedSongs)
         updatePlaylist(songList)
     }
-
-
-    private fun getLayoutManager(): RecyclerView.LayoutManager =
-        if (isGridLayout) GridLayoutManager(requireContext(), 2)
-        else LinearLayoutManager(requireContext())
 
     private fun updatePlaylist(sortedSongs: List<Song>) {
         songList.clear()
@@ -156,24 +205,65 @@ class SongListFragment : Fragment(), OnSongClickListener {
     }
 
     override fun onSongClick(song: Song) {
-        val playerFragment = PlayerFragment().apply {
-            arguments = Bundle().apply {
-                putParcelable("song", song)
+        if (!isBound || musicService == null) {
+            Log.e("SongListFragment", "MusicService chưa bind!")
+            return
+        }
+
+        Log.d("SongListFragment", "Người dùng chọn bài hát: ${song.title}")
+
+        if (selectedSongId == null || selectedSongId != song.songId) {
+            selectedSongId = song.songId
+            isPlaying = true
+
+            musicService?.playSong(song)
+            Log.d("SongListFragment", "Gọi playSong(): ${song.title}")
+            songAdapter.setSelectedSongId(song.songId)
+
+            val playerFragment = PlayerFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelableArrayList("SongList", ArrayList(songList))
+                    putParcelable("SelectedSong", song)
+                }
+            }
+            (activity as? MainActivity)?.supportFragmentManager?.beginTransaction()
+                ?.replace(R.id.fragContainer, playerFragment)
+                ?.addToBackStack(null)
+                ?.commit()
+
+            (activity as? OnSongClickListener)?.onSongClick(song)
+
+        } else {
+            isPlaying = !isPlaying
+            if (isPlaying) {
+                musicService?.resumeSong()
+                Log.d("SongListFragment", "Gọi resumeSong()")
+            } else {
+                musicService?.pauseSong()
+                Log.d("SongListFragment", "Gọi pauseSong()")
             }
         }
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragContainer, playerFragment)
-            .addToBackStack(null)
-            .commit()
+    }
+
+    private fun observeServiceState() {
+        musicService?.currentSong?.observe(viewLifecycleOwner) { song ->
+            if (song != null) {
+                selectedSongId = song.songId
+                songAdapter.setSelectedSongId(song.songId)
+            } else {
+                selectedSongId = null
+                songAdapter.setSelectedSongId(null)
+            }
+        }
+
+        musicService?.isPlaying?.observe(viewLifecycleOwner) { playing ->
+            isPlaying = playing
+
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mediaPlayer?.apply {
-            if (isPlaying) stop()
-            release()
-        }
-        mediaPlayer = null
         _binding = null
     }
 }

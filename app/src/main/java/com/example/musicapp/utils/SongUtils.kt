@@ -1,9 +1,7 @@
 package com.example.musicapp.utils
 
+import android.content.ContentUris
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
@@ -24,6 +22,7 @@ object SongUtils {
         )
 
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
 
         try {
@@ -38,20 +37,27 @@ object SongUtils {
             cursor?.use {
                 if (it.moveToFirst()) {
                     do {
-                        val id = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
+                        val idLong = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
                         val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)) ?: "Unknown Title"
                         val artist = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)) ?: "Unknown Artist"
                         val filePath = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA))
                         val duration = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
                         val albumId = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
 
-                        val songUri = Uri.withAppendedPath(
-                            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                            id
-                        ).toString()
+                        val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, idLong)
 
 
-                        val song = Song(id, title, artist, songUri, "content://media/external/audio/albumart/$albumId", duration)
+                        val albumArtUri = "content://media/external/audio/albumart/$albumId"
+
+
+                        val song = Song(
+                            songId = idLong.toString(),
+                            title = title,
+                            artist = artist,
+                            songUri = contentUri.toString(),
+                            albumArt = albumArtUri,
+                            duration = duration
+                        )
                         songList.add(song)
 
                     } while (it.moveToNext())

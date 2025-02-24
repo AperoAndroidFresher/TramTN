@@ -11,10 +11,6 @@ class SongRepository(private val songDao: SongDao) {
     suspend fun insertSongs(songs: List<Song>) {
         songDao.insertSongs(songs)
     }
-    fun getSongsByPlaylist(playlistId: Int): Flow<List<Song>> {
-        return songDao.getSongsByPlaylistId(playlistId)
-    }
-
 
     companion object {
         @Volatile

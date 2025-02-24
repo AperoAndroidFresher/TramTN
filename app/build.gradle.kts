@@ -52,7 +52,7 @@ dependencies {
     implementation (libs.okhttp)
     implementation (libs.kotlinx.coroutines.android)
     implementation (libs.androidx.room.ktx)
-
+    implementation (libs.picasso)
 
     implementation (libs.com.github.bumptech.glide.glide)
     annotationProcessor (libs.compiler)
